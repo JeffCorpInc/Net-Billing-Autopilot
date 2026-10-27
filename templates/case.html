@@ -5,27 +5,456 @@
 {% block page_title %}Application Pack {{ case_id }}{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-  <div class="flex items-center justify-between">
-    <a href="/" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
-      <i data-lucide="arrow-left" class="w-4 h-4"></i>
-      <span>Back to Queue</span>
-    </a>
-    <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-      ID: {{ case_id }}
-    </span>
+<div class="space-y-8 fade-slide-up">
+
+  <!-- Header Card -->
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-7 shadow-sm">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      
+      <!-- Left: Title, Badges & Meta -->
+      <div class="space-y-3 max-w-2xl">
+        <div class="flex items-center gap-3">
+          <a href="/" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Back to Queue</span>
+          </a>
+          <span class="text-slate-300 dark:text-slate-700">|</span>
+          <span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+            {{ pack.case_id }}
+          </span>
+          {% if pack.category == 'clean' %}
+          <span class="px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+            Clean Case
+          </span>
+          {% else %}
+          <span class="px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+            Trap Verification
+          </span>
+          {% endif %}
+        </div>
+
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            {{ pack.cnic.name }}
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            {{ pack.description }}
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-500"></i>
+            <span>Rules as of <strong>{{ rules_as_of }}</strong></span>
+          </span>
+          <span>•</span>
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="cpu" class="w-3.5 h-3.5 text-purple-500"></i>
+            <span>Mode: <strong>{{ llm_mode | upper }} ({{ llm_provider }})</strong></span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Right: Overall Status & Animated Readiness Ring & Actions -->
+      <div class="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-5 shrink-0">
+        <!-- Status & Readiness Circle -->
+        <div class="flex items-center gap-4">
+          <!-- Readiness Ring -->
+          {% set score = report.readiness_score if report else 0.0 %}
+          {% set circumference = 175.9 %}
+          {% set offset = circumference - (circumference * score / 100) %}
+          <div class="relative w-16 h-16 flex items-center justify-center shrink-0">
+            <svg class="w-16 h-16" viewBox="0 0 64 64">
+              <circle class="text-slate-100 dark:text-slate-800 stroke-current" stroke-width="6" cx="32" cy="32" r="28" fill="transparent"></circle>
+              <circle class="text-emerald-500 stroke-current readiness-ring-circle" stroke-width="6" stroke-linecap="round" cx="32" cy="32" r="28" fill="transparent" stroke-dasharray="175.9" stroke-dashoffset="{{ offset }}"></circle>
+            </svg>
+            <span class="absolute text-xs font-extrabold font-mono text-slate-900 dark:text-white">{{ score | round | int }}%</span>
+          </div>
+
+          <!-- Overall Status Badge -->
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Overall Verdict</div>
+            {% if report and report.overall == 'READY' %}
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 mt-1">
+              <i data-lucide="badge-check" class="w-4 h-4"></i>
+              <span>READY TO FILE</span>
+            </div>
+            {% elif report and report.overall == 'NOT_READY' %}
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 mt-1">
+              <i data-lucide="octagon-x" class="w-4 h-4"></i>
+              <span>NOT READY</span>
+            </div>
+            {% elif report and report.overall == 'NEEDS_REVIEW' %}
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 mt-1">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              <span>NEEDS REVIEW</span>
+            </div>
+            {% else %}
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 mt-1">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+              <span>PENDING CHECKS</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="case-run-checks-btn" type="button" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all shadow-md flex items-center gap-2 active:scale-95 disabled:opacity-50">
+            <span id="case-run-spinner" class="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin hidden"></span>
+            <i data-lucide="play" class="w-3.5 h-3.5"></i>
+            <span id="case-run-btn-text">Run Checks</span>
+          </button>
+
+          <button id="case-review-btn" type="button" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-colors flex items-center gap-1.5 border border-slate-200 dark:border-slate-700">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400"></i>
+            <span>Mark Reviewed</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-        <i data-lucide="file-text" class="w-5 h-5"></i>
+  <!-- Stepper Progress Bar -->
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+      <div class="flex items-center gap-2.5 text-emerald-600 dark:text-emerald-400 font-bold">
+        <span class="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs">1</span>
+        <span>Documents Present</span>
       </div>
-      <div>
-        <h2 class="text-base font-bold text-slate-900 dark:text-white">Case Inspection View</h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400">Detailed document cards, rules validation engine, and draft generation mount in Phase 2.</p>
+      <div class="flex items-center gap-2.5 {% if report %}text-emerald-600 dark:text-emerald-400 font-bold{% else %}text-slate-400 font-medium{% endif %}">
+        <span class="w-6 h-6 rounded-full {% if report %}bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400{% else %}bg-slate-100 dark:bg-slate-800 text-slate-400{% endif %} flex items-center justify-center text-xs">2</span>
+        <span>Regulatory Checks</span>
+      </div>
+      <div class="flex items-center gap-2.5 text-slate-400 font-medium">
+        <span class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center text-xs">3</span>
+        <span>Checklist &amp; Draft</span>
+      </div>
+      <div class="flex items-center gap-2.5 {% if review %}text-teal-600 dark:text-teal-400 font-bold{% else %}text-slate-400 font-medium{% endif %}">
+        <span class="w-6 h-6 rounded-full {% if review %}bg-teal-100 dark:bg-teal-950 text-teal-600 dark:text-teal-400{% else %}bg-slate-100 dark:bg-slate-800 text-slate-400{% endif %} flex items-center justify-center text-xs">4</span>
+        <span>Staff Review</span>
       </div>
     </div>
   </div>
+
+  <!-- Review Banner if Reviewed -->
+  {% if review %}
+  <div class="bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 rounded-2xl p-4 flex items-center gap-3 text-xs text-teal-900 dark:text-teal-200">
+    <i data-lucide="check-circle-2" class="w-5 h-5 text-teal-600 dark:text-teal-400 shrink-0"></i>
+    <div>
+      <span class="font-bold">Reviewed by {{ review.staff_name }}</span>
+      {% if review.note %}<span class="ml-2 opacity-90">— "{{ review.note }}"</span>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- SECTION A: Document Pack Cards (Realistic Styling) -->
+  <div class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
+        <i data-lucide="folder" class="w-4 h-4 text-amber-500"></i>
+        <span>Section A — Customer Application Dossier</span>
+      </h3>
+      <span class="text-xs text-slate-400 font-medium">{{ pack.docs_present | length }} documents attached</span>
+    </div>
+
+    <!-- 3 Document Cards Grid -->
+    {% set is_expired = (pack.cnic.expiry < '2026-04-13') %}
+    {% set has_bad_cnic_format = ('-' not in pack.cnic.cnic_no) %}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Card 1: National Identity Card (Pakistan CNIC) -->
+      <div class="cnic-card p-5 relative flex flex-col justify-between min-h-[220px]">
+        {% if is_expired %}
+        <div class="absolute -right-12 top-6 rotate-45 bg-rose-600 text-white font-black text-[10px] tracking-widest py-1 px-14 shadow-lg uppercase">
+          EXPIRED
+        </div>
+        {% endif %}
+
+        <div>
+          <div class="text-[10px] font-bold tracking-wider uppercase opacity-85 border-b border-emerald-400/30 pb-2 flex items-center justify-between">
+            <span>Islamic Republic of Pakistan</span>
+            <span class="text-[9px]">NADRA</span>
+          </div>
+
+          <div class="mt-4 flex items-start gap-3">
+            <div class="w-12 h-14 bg-emerald-800/60 rounded border border-emerald-400/40 flex items-center justify-center shrink-0">
+              <i data-lucide="user" class="w-7 h-7 text-emerald-200/80"></i>
+            </div>
+            <div class="space-y-1 min-w-0">
+              <div class="text-[11px] opacity-75">Name / نام</div>
+              <div class="text-xs font-bold truncate">{{ pack.cnic.name }}</div>
+              <div class="text-[10px] opacity-75">Father Name: {{ pack.cnic.father_name }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-emerald-400/30 space-y-1.5 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] opacity-75">Identity Number</span>
+            <span class="font-mono font-bold tracking-wider {% if has_bad_cnic_format %}ring-2 ring-rose-400 px-1 rounded bg-rose-950/80 text-rose-200{% endif %}">
+              {{ pack.cnic.cnic_no }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-[10px] opacity-75">Date of Expiry</span>
+            <span class="font-mono {% if is_expired %}text-rose-200 font-bold{% endif %}">{{ pack.cnic.expiry }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Electricity Bill Card (K-Electric) -->
+      {% set capacity_fail = (pack.system.proposed_kw > pack.bill.sanctioned_load_kw) %}
+      {% set phase_fail = (pack.bill.connection_phase.lower() != '3-phase') %}
+      {% set connected_fail = (pack.bill.connected_load_kw > pack.bill.sanctioned_load_kw) %}
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">KE</div>
+              <span class="text-xs font-bold text-slate-900 dark:text-white">Electricity Bill (K-Electric)</span>
+            </div>
+            <span class="font-mono text-[11px] text-slate-400">Ref: {{ pack.bill.reference_no[:4] }}****{{ pack.bill.reference_no[-2:] }}</span>
+          </div>
+
+          <div class="mt-3 space-y-1 text-xs">
+            <div class="text-[11px] text-slate-400 font-medium">Consumer Name</div>
+            <div class="font-semibold text-slate-800 dark:text-slate-100">{{ pack.bill.consumer_name }}</div>
+            <div class="text-[11px] text-slate-400 truncate mt-1">{{ pack.bill.address }}</div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-2 text-xs">
+          <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-850 {% if capacity_fail %}ring-2 ring-rose-500 bg-rose-50 dark:bg-rose-950/40{% endif %}">
+            <div class="text-[10px] text-slate-400">Sanctioned Load</div>
+            <div class="font-mono font-bold text-slate-800 dark:text-slate-100">{{ pack.bill.sanctioned_load_kw }} kW</div>
+          </div>
+          <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-850 {% if connected_fail %}ring-2 ring-rose-500 bg-rose-50 dark:bg-rose-950/40{% endif %}">
+            <div class="text-[10px] text-slate-400">Connected Load</div>
+            <div class="font-mono font-bold text-slate-800 dark:text-slate-100">{{ pack.bill.connected_load_kw }} kW</div>
+          </div>
+          <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-850">
+            <div class="text-[10px] text-slate-400">Tariff</div>
+            <div class="font-mono font-bold text-slate-800 dark:text-slate-100">{{ pack.bill.tariff }}</div>
+          </div>
+          <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-850 {% if phase_fail %}ring-2 ring-rose-500 bg-rose-50 dark:bg-rose-950/40{% endif %}">
+            <div class="text-[10px] text-slate-400">Phase</div>
+            <div class="font-mono font-bold {% if phase_fail %}text-rose-600 dark:text-rose-400{% else %}text-slate-800 dark:text-slate-100{% endif %}">
+              {{ pack.bill.connection_phase }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Ownership Document Card -->
+      <div class="doc-texture-paper border border-amber-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-amber-200/60 dark:border-slate-800">
+            <div class="flex items-center gap-2">
+              <i data-lucide="scroll" class="w-4 h-4 text-amber-700 dark:text-amber-500"></i>
+              <span class="text-xs font-bold text-slate-900 dark:text-white capitalize">
+                {{ pack.ownership.type | replace('_', ' ') }}
+              </span>
+            </div>
+            {% if pack.is_tenant %}
+              {% if 'noc' in pack.docs_present %}
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800">Tenant · NOC on file</span>
+              {% else %}
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">Tenant · NOC missing</span>
+              {% endif %}
+            {% else %}
+              <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Owner Occupied</span>
+            {% endif %}
+          </div>
+
+          <div class="mt-3 space-y-1 text-xs">
+            <div class="text-[11px] text-slate-400 font-medium">Owner on Deed</div>
+            <div class="font-semibold text-slate-800 dark:text-slate-100">{{ pack.ownership.owner_name }}</div>
+            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">{{ pack.ownership.property_address }}</div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-amber-200/60 dark:border-slate-800 text-[11px] text-slate-500 flex items-center justify-between">
+          <span>System Size: <strong>{{ pack.system.proposed_kw }} kW</strong></span>
+          <span>Panels: <strong>{{ pack.system.panel_count }} × {{ pack.system.panel_watt }}W</strong></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Documents Strip -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+      <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+        <i data-lucide="check-check" class="w-4 h-4 text-emerald-500"></i>
+        <span>Required Document Checklist:</span>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        {% set required_list = ['cnic', 'bill', 'ownership', 'single_line_diagram', 'affidavit', 'vendor_checklist', 'inverter_datasheet', 'inverter_settings_letter'] %}
+        {% if pack.is_tenant %}{% set _ = required_list.append('noc') %}{% endif %}
+        {% if pack.system.proposed_kw >= 250 %}{% set _ = required_list.append('load_flow_study') %}{% endif %}
+        {% if pack.applicant_type == 'commercial' and pack.system.proposed_kw >= 250 %}
+          {% set _ = required_list.append('ntn') %}
+          {% set _ = required_list.append('form_29') %}
+        {% endif %}
+
+        {% for doc_key in required_list %}
+        {% set is_present = doc_key in pack.docs_present %}
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border {% if is_present %}bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800{% else %}bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800 font-semibold{% endif %}">
+          <i data-lucide="{% if is_present %}check{% else %}x{% endif %}" class="w-3.5 h-3.5 {% if is_present %}text-emerald-500{% else %}text-rose-500{% endif %}"></i>
+          <span>{{ doc_labels.get(doc_key, doc_key) }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION B: Compliance Checks & Gauges -->
+  <div class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
+        <i data-lucide="sliders" class="w-4 h-4 text-amber-500"></i>
+        <span>Section B — Compliance Rules &amp; Engineering Metrics</span>
+      </h3>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left Column: Check Rows (2/3 width) -->
+      <div class="lg:col-span-2 space-y-3">
+        {% if report %}
+          {% for r in report.results %}
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-start justify-between gap-4 transition-all hover:border-slate-300 dark:hover:border-slate-700">
+            <div class="flex items-start gap-3 min-w-0">
+              <div class="mt-0.5 w-6 h-6 rounded-full flex items-center justify-center shrink-0 {% if r.status == 'PASS' %}bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400{% elif r.status == 'FAIL' %}bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400{% elif r.status == 'INFO' %}bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400{% else %}bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400{% endif %}">
+                <i data-lucide="{% if r.status == 'PASS' %}check{% elif r.status == 'FAIL' %}x{% elif r.status == 'INFO' %}info{% else %}clock{% endif %}" class="w-3.5 h-3.5"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-mono text-xs font-bold text-slate-400">{{ r.id }}</span>
+                  <span class="text-xs font-bold text-slate-900 dark:text-white">{{ r.name }}</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold border {% if r.status == 'PASS' %}bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800{% elif r.status == 'FAIL' %}bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800{% elif r.status == 'INFO' %}bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800{% else %}bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800{% endif %}">
+                    {{ r.status }}
+                  </span>
+                  <span class="text-[10px] px-2 py-0.5 rounded font-mono bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                    {{ r.source | upper }}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                  {{ r.detail }}
+                </p>
+                <div class="mt-1 text-[11px] text-slate-400 flex items-center gap-1">
+                  <i data-lucide="scale" class="w-3 h-3 text-slate-400"></i>
+                  <span>Citation: {{ r.citation }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center space-y-3">
+            <div class="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-500 flex items-center justify-center mx-auto">
+              <i data-lucide="play-circle" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-900 dark:text-white">Compliance Checks Not Executed</h4>
+            <p class="text-xs text-slate-400 max-w-sm mx-auto">
+              Click the "Run Checks" button in the header to run all deterministic checks R1–R7 against this customer pack.
+            </p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Right Column: Visual Panels (1/3 width) -->
+      <div class="space-y-4">
+        
+        <!-- 1. Capacity Gauge Panel -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm text-center">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+            <span>Capacity Gauge</span>
+            <span class="font-mono text-slate-400">Reg. 3(2)</span>
+          </div>
+
+          <!-- SVG Semicircle Gauge -->
+          <div class="relative w-44 h-24 mx-auto overflow-hidden">
+            <svg viewBox="0 0 100 55" class="w-full h-full">
+              <!-- Semicircle Track: Teal zone (0 to 66%) + Rose zone (66% to 100%) -->
+              <path d="M 10 50 A 40 40 0 0 1 66 11" fill="none" stroke="#0D9488" stroke-width="8" stroke-linecap="round"></path>
+              <path d="M 68 12 A 40 40 0 0 1 90 50" fill="none" stroke="#F43F5E" stroke-width="8" stroke-linecap="round"></path>
+              
+              <!-- Gauge Needle Pivot -->
+              <circle cx="50" cy="50" r="4" fill="#0F172A" class="dark:fill-white"></circle>
+              <!-- Animated Needle -->
+              <line id="gauge-needle" data-proposed="{{ pack.system.proposed_kw }}" data-sanctioned="{{ pack.bill.sanctioned_load_kw }}" x1="50" y1="50" x2="50" y2="16" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" class="gauge-needle"></line>
+            </svg>
+          </div>
+
+          <div class="mt-2 text-xs">
+            <span class="font-extrabold font-mono text-sm {% if capacity_fail %}text-rose-600 dark:text-rose-400{% else %}text-slate-900 dark:text-white{% endif %}">
+              Proposed {{ pack.system.proposed_kw }} kW
+            </span>
+            <span class="text-slate-400 text-[11px] block mt-0.5">Sanctioned Limit: {{ pack.bill.sanctioned_load_kw }} kW</span>
+          </div>
+        </div>
+
+        <!-- 2. Load Panel (Connected vs Sanctioned) -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+            <span>Load Comparison</span>
+            <span class="font-mono text-slate-400">KE Guidelines</span>
+          </div>
+
+          <!-- Sanctioned Bar -->
+          <div class="space-y-1 text-xs">
+            <div class="flex justify-between text-[11px]">
+              <span class="text-slate-500">Sanctioned</span>
+              <span class="font-mono font-bold">{{ pack.bill.sanctioned_load_kw }} kW</span>
+            </div>
+            <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full bg-slate-900 dark:bg-slate-300 rounded-full" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <!-- Connected Bar -->
+          {% set load_ratio = (pack.bill.connected_load_kw / pack.bill.sanctioned_load_kw * 100) if pack.bill.sanctioned_load_kw else 0 %}
+          <div class="space-y-1 text-xs">
+            <div class="flex justify-between text-[11px]">
+              <span class="text-slate-500">Connected</span>
+              <span class="font-mono font-bold {% if connected_fail %}text-rose-600 dark:text-rose-400{% endif %}">{{ pack.bill.connected_load_kw }} kW</span>
+            </div>
+            <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full {% if connected_fail %}bg-rose-500{% else %}bg-teal-500{% endif %} rounded-full transition-all duration-500" style="width: {{ [load_ratio, 100] | min }}%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Fee Card -->
+        {% set fee_rs = (pack.system.proposed_kw * 1000) | int %}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-2">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+            <span>Regulatory Application Fee</span>
+            <span class="font-mono text-slate-400">Schedule-IV</span>
+          </div>
+          <div class="text-xl font-extrabold text-amber-600 dark:text-amber-400 font-mono-numbers">
+            Rs {{ "{:,}".format(fee_rs) }}
+          </div>
+          <p class="text-[11px] text-slate-400">
+            Computed as {{ pack.system.proposed_kw }} kW × Rs 1,000 per kW. Paid directly by customer to K-Electric.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/case.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    CasePage.init('{{ pack.case_id }}');
+  });
+</script>
 {% endblock %}

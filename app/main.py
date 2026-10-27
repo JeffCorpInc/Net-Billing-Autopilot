@@ -99,8 +99,23 @@ async def dashboard_page(request: Request):
 @app.get("/case/{case_id}", response_class=HTMLResponse)
 async def case_page(request: Request, case_id: str):
     """Render individual application case page."""
+    from app.storage import get_latest_report, get_pack, load_reviews
+    pack = get_pack(case_id)
+    if not pack:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+
+    report = get_latest_report(case_id)
+    reviews = load_reviews()
+    review = reviews.get(case_id)
+
     context = get_base_context(request)
-    context.update({"active_page": "case", "case_id": case_id})
+    context.update({
+        "active_page": "case",
+        "case_id": case_id,
+        "pack": pack,
+        "report": report,
+        "review": review,
+    })
     return templates.TemplateResponse(request=request, name="case.html", context=context)
 
 
@@ -162,4 +177,31 @@ async def get_case_detail(case_id: str):
         "report": report.model_dump() if report else None,
         "review": review,
     }
+
+
+@app.post("/api/check/{case_id}")
+async def run_checks(case_id: str, use_llm: bool = False):
+    """Run compliance checks (R1-R7 deterministic + L1/L2 if use_llm=true) on a case."""
+    from app.merge import build_case_report
+    from app.rules import run_code_rules
+    from app.storage import get_pack
+
+    pack = get_pack(case_id)
+    if not pack:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+
+    # Run deterministic rules R1-R7
+    rule_results = run_code_rules(pack)
+    llm_results = []
+    shadow_checks = []
+
+    # In Phase 3, if use_llm=True, llm_checks will be executed here.
+    report = build_case_report(
+        pack=pack,
+        rule_results=rule_results,
+        llm_results=llm_results,
+        shadow_checks=shadow_checks,
+    )
+    return report.model_dump()
+
 
