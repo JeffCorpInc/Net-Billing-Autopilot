@@ -1,0 +1,44 @@
+{
+  "case_id": "C18",
+  "category": "trap",
+  "description": "Dual trap: proposed 14 kW on 10 kW load AND expired CNIC",
+  "applicant_type": "residential",
+  "cnic": {
+    "name": "Babar Azam",
+    "father_name": "Abdul Sattar",
+    "cnic_no": "42101-1000629-1",
+    "expiry": "2026-09-12",
+    "address": "B-142, Block 5, Clifton, Karachi"
+  },
+  "bill": {
+    "consumer_name": "Babar Azam",
+    "reference_no": "01100000083312",
+    "sanctioned_load_kw": 10.0,
+    "connected_load_kw": 10.0,
+    "tariff": "A-1",
+    "connection_phase": "3-phase",
+    "address": "B-142, Block 5, Clifton, Karachi"
+  },
+  "ownership": {
+    "type": "sale_deed",
+    "owner_name": "Babar Azam",
+    "property_address": "B-142, Block 5, Clifton, Karachi"
+  },
+  "system": {
+    "proposed_kw": 14.0,
+    "inverter_kw": 14.0,
+    "panel_count": 26,
+    "panel_watt": 550
+  },
+  "is_tenant": false,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "affidavit",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter"
+  ]
+}

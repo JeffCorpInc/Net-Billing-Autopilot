@@ -135,3 +135,31 @@ async def health_check():
         "llm_configured": settings.is_llm_configured,
         "mode": settings.mode,
     }
+
+
+@app.get("/api/cases")
+async def get_all_cases():
+    """Return summary list of all 21 application cases for the dashboard."""
+    from app.storage import list_case_summaries
+    summaries = list_case_summaries()
+    return [s.model_dump() for s in summaries]
+
+
+@app.get("/api/cases/{case_id}")
+async def get_case_detail(case_id: str):
+    """Retrieve full pack, latest report, and staff review for a case."""
+    from app.storage import get_latest_report, get_pack, load_reviews
+    pack = get_pack(case_id)
+    if not pack:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+
+    report = get_latest_report(case_id)
+    reviews = load_reviews()
+    review = reviews.get(case_id)
+
+    return {
+        "pack": pack.model_dump(),
+        "report": report.model_dump() if report else None,
+        "review": review,
+    }
+

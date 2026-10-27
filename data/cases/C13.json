@@ -1,0 +1,44 @@
+{
+  "case_id": "C13",
+  "category": "trap",
+  "description": "Missing tenant NOC trap: tenant applicant without landlord NOC",
+  "applicant_type": "residential",
+  "cnic": {
+    "name": "Waqas Ali",
+    "father_name": "Syed Mehmood Ali",
+    "cnic_no": "42101-1000444-1",
+    "expiry": "2030-10-26",
+    "address": "Flat G-1, Palm Residency, Scheme 33, Karachi"
+  },
+  "bill": {
+    "consumer_name": "Waqas Ali",
+    "reference_no": "01100000058812",
+    "sanctioned_load_kw": 10.0,
+    "connected_load_kw": 10.0,
+    "tariff": "A-1",
+    "connection_phase": "3-phase",
+    "address": "Flat G-1, Palm Residency, Scheme 33, Karachi"
+  },
+  "ownership": {
+    "type": "lease_deed",
+    "owner_name": "Adeel Memon",
+    "property_address": "Flat G-1, Palm Residency, Scheme 33, Karachi"
+  },
+  "system": {
+    "proposed_kw": 8.0,
+    "inverter_kw": 8.0,
+    "panel_count": 15,
+    "panel_watt": 550
+  },
+  "is_tenant": true,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "affidavit",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter"
+  ]
+}

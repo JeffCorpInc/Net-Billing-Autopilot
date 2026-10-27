@@ -1,0 +1,44 @@
+{
+  "case_id": "C15",
+  "category": "trap",
+  "description": "Phase trap: single phase connection is ineligible under NEPRA Reg 2(1)(v)",
+  "applicant_type": "residential",
+  "cnic": {
+    "name": "Kamran Akram",
+    "father_name": "Muhammad Yaqoob",
+    "cnic_no": "42101-1000518-1",
+    "expiry": "2030-10-26",
+    "address": "House 8, Street 2, Bahadurabad, Karachi"
+  },
+  "bill": {
+    "consumer_name": "Kamran Akram",
+    "reference_no": "01100000068612",
+    "sanctioned_load_kw": 10.0,
+    "connected_load_kw": 10.0,
+    "tariff": "A-1",
+    "connection_phase": "1-phase",
+    "address": "House 8, Street 2, Bahadurabad, Karachi"
+  },
+  "ownership": {
+    "type": "sale_deed",
+    "owner_name": "Kamran Akram",
+    "property_address": "House 8, Street 2, Bahadurabad, Karachi"
+  },
+  "system": {
+    "proposed_kw": 8.0,
+    "inverter_kw": 8.0,
+    "panel_count": 15,
+    "panel_watt": 550
+  },
+  "is_tenant": false,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "affidavit",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter"
+  ]
+}

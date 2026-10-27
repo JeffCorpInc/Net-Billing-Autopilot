@@ -1,0 +1,45 @@
+{
+  "case_id": "C06",
+  "category": "clean",
+  "description": "Clean tenant pack, landlord on lease_deed, NOC on file, CNIC matches bill",
+  "applicant_type": "residential",
+  "cnic": {
+    "name": "Farhan Akhtar",
+    "father_name": "Akhtar Hussain",
+    "cnic_no": "42101-1000185-1",
+    "expiry": "2030-10-26",
+    "address": "Apartment 5-B, Executive Heights, Gulistan-e-Johar Block 7, Karachi"
+  },
+  "bill": {
+    "consumer_name": "Farhan Akhtar",
+    "reference_no": "01100000024512",
+    "sanctioned_load_kw": 10.0,
+    "connected_load_kw": 10.0,
+    "tariff": "A-1",
+    "connection_phase": "3-phase",
+    "address": "Apartment 5-B, Executive Heights, Gulistan-e-Johar Block 7, Karachi"
+  },
+  "ownership": {
+    "type": "lease_deed",
+    "owner_name": "Tariq Mahmood",
+    "property_address": "Apartment 5-B, Executive Heights, Gulistan-e-Johar Block 7, Karachi"
+  },
+  "system": {
+    "proposed_kw": 8.0,
+    "inverter_kw": 8.0,
+    "panel_count": 15,
+    "panel_watt": 550
+  },
+  "is_tenant": true,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "affidavit",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter",
+    "noc"
+  ]
+}

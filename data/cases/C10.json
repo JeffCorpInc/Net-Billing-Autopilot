@@ -1,0 +1,44 @@
+{
+  "case_id": "C10",
+  "category": "trap",
+  "description": "Expired CNIC trap: applicant CNIC expired 75 days ago",
+  "applicant_type": "residential",
+  "cnic": {
+    "name": "Imran Ashraf",
+    "father_name": "Muhammad Ashraf",
+    "cnic_no": "42101-1000333-1",
+    "expiry": "2026-08-13",
+    "address": "House 19-C, Khayaban-e-Shamsheer, DHA Phase 5, Karachi"
+  },
+  "bill": {
+    "consumer_name": "Imran Ashraf",
+    "reference_no": "01100000044112",
+    "sanctioned_load_kw": 10.0,
+    "connected_load_kw": 10.0,
+    "tariff": "A-1",
+    "connection_phase": "3-phase",
+    "address": "House 19-C, Khayaban-e-Shamsheer, DHA Phase 5, Karachi"
+  },
+  "ownership": {
+    "type": "sale_deed",
+    "owner_name": "Imran Ashraf",
+    "property_address": "House 19-C, Khayaban-e-Shamsheer, DHA Phase 5, Karachi"
+  },
+  "system": {
+    "proposed_kw": 8.0,
+    "inverter_kw": 8.0,
+    "panel_count": 15,
+    "panel_watt": 550
+  },
+  "is_tenant": false,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "affidavit",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter"
+  ]
+}

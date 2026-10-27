@@ -1,0 +1,44 @@
+{
+  "case_id": "C04",
+  "category": "clean",
+  "description": "Clean pack with standard Karachi address abbreviation (House 45-A, PECHS Block 2 vs H# 45-A PECHS Blk-2 Khi)",
+  "applicant_type": "residential",
+  "cnic": {
+    "name": "Bilal Ahmed",
+    "father_name": "Bashir Ahmed",
+    "cnic_no": "42101-1000111-1",
+    "expiry": "2030-10-26",
+    "address": "House 45-A, PECHS Block 2, Karachi"
+  },
+  "bill": {
+    "consumer_name": "Bilal Ahmed",
+    "reference_no": "01100000014712",
+    "sanctioned_load_kw": 10.0,
+    "connected_load_kw": 10.0,
+    "tariff": "A-1",
+    "connection_phase": "3-phase",
+    "address": "H# 45-A PECHS Blk-2 Khi"
+  },
+  "ownership": {
+    "type": "sale_deed",
+    "owner_name": "Bilal Ahmed",
+    "property_address": "House 45-A, PECHS Block 2, Karachi"
+  },
+  "system": {
+    "proposed_kw": 8.0,
+    "inverter_kw": 8.0,
+    "panel_count": 15,
+    "panel_watt": 550
+  },
+  "is_tenant": false,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "affidavit",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter"
+  ]
+}

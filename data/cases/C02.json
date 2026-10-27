@@ -1,0 +1,44 @@
+{
+  "case_id": "C02",
+  "category": "clean",
+  "description": "Clean residential pack, proposed load exactly equals sanctioned load (5 kW = 5 kW)",
+  "applicant_type": "residential",
+  "cnic": {
+    "name": "Mohammad Hamza Qureshi",
+    "father_name": "Ghulam Nabi",
+    "cnic_no": "42101-1000037-1",
+    "expiry": "2030-10-26",
+    "address": "Flat 302, Al-Ghafoor Tower, Gulshan-e-Iqbal Block 13-D, Karachi"
+  },
+  "bill": {
+    "consumer_name": "Mohammad Hamza Qureshi",
+    "reference_no": "01100000004912",
+    "sanctioned_load_kw": 5.0,
+    "connected_load_kw": 5.0,
+    "tariff": "A-1",
+    "connection_phase": "3-phase",
+    "address": "Flat 302, Al-Ghafoor Tower, Gulshan-e-Iqbal Block 13-D, Karachi"
+  },
+  "ownership": {
+    "type": "sale_deed",
+    "owner_name": "Mohammad Hamza Qureshi",
+    "property_address": "Flat 302, Al-Ghafoor Tower, Gulshan-e-Iqbal Block 13-D, Karachi"
+  },
+  "system": {
+    "proposed_kw": 5.0,
+    "inverter_kw": 5.0,
+    "panel_count": 10,
+    "panel_watt": 550
+  },
+  "is_tenant": false,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "affidavit",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter"
+  ]
+}

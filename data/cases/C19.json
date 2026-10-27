@@ -1,0 +1,43 @@
+{
+  "case_id": "C19",
+  "category": "trap",
+  "description": "Missing document trap: Schedule-V applicant affidavit omitted",
+  "applicant_type": "residential",
+  "cnic": {
+    "name": "Shaheen Afridi",
+    "father_name": "Muhammad Siddique",
+    "cnic_no": "42101-1000666-1",
+    "expiry": "2030-10-26",
+    "address": "Plot 88-C, 11th Commercial Street, DHA Phase 2 Ext, Karachi"
+  },
+  "bill": {
+    "consumer_name": "Shaheen Afridi",
+    "reference_no": "01100000088212",
+    "sanctioned_load_kw": 10.0,
+    "connected_load_kw": 10.0,
+    "tariff": "A-1",
+    "connection_phase": "3-phase",
+    "address": "Plot 88-C, 11th Commercial Street, DHA Phase 2 Ext, Karachi"
+  },
+  "ownership": {
+    "type": "sale_deed",
+    "owner_name": "Shaheen Afridi",
+    "property_address": "Plot 88-C, 11th Commercial Street, DHA Phase 2 Ext, Karachi"
+  },
+  "system": {
+    "proposed_kw": 8.0,
+    "inverter_kw": 8.0,
+    "panel_count": 15,
+    "panel_watt": 550
+  },
+  "is_tenant": false,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter"
+  ]
+}

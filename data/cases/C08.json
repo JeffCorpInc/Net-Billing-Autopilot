@@ -1,0 +1,44 @@
+{
+  "case_id": "C08",
+  "category": "clean",
+  "description": "Clean pack with honorific abbreviation (Syed Ali Raza vs S. Ali Raza)",
+  "applicant_type": "residential",
+  "cnic": {
+    "name": "Syed Ali Raza",
+    "father_name": "Abdul Sattar",
+    "cnic_no": "42101-1000259-1",
+    "expiry": "2030-10-26",
+    "address": "House 78, Dhoraji Colony, Karachi"
+  },
+  "bill": {
+    "consumer_name": "S. Ali Raza",
+    "reference_no": "01100000034312",
+    "sanctioned_load_kw": 10.0,
+    "connected_load_kw": 10.0,
+    "tariff": "A-1",
+    "connection_phase": "3-phase",
+    "address": "House 78, Dhoraji Colony, Karachi"
+  },
+  "ownership": {
+    "type": "sale_deed",
+    "owner_name": "Syed Ali Raza",
+    "property_address": "House 78, Dhoraji Colony, Karachi"
+  },
+  "system": {
+    "proposed_kw": 8.0,
+    "inverter_kw": 8.0,
+    "panel_count": 15,
+    "panel_watt": 550
+  },
+  "is_tenant": false,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "affidavit",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter"
+  ]
+}

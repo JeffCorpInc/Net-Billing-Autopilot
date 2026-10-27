@@ -1,0 +1,44 @@
+{
+  "case_id": "C17",
+  "category": "trap",
+  "description": "CNIC format trap: 13-digit number missing standard hyphens",
+  "applicant_type": "residential",
+  "cnic": {
+    "name": "Asif Mehmood",
+    "father_name": "Mahmood Ul Hassan",
+    "cnic_no": "4210112345671",
+    "expiry": "2030-10-26",
+    "address": "Flat 302, Al-Ghafoor Tower, Gulshan-e-Iqbal Block 13-D, Karachi"
+  },
+  "bill": {
+    "consumer_name": "Asif Mehmood",
+    "reference_no": "01100000078412",
+    "sanctioned_load_kw": 10.0,
+    "connected_load_kw": 10.0,
+    "tariff": "A-1",
+    "connection_phase": "3-phase",
+    "address": "Flat 302, Al-Ghafoor Tower, Gulshan-e-Iqbal Block 13-D, Karachi"
+  },
+  "ownership": {
+    "type": "sale_deed",
+    "owner_name": "Asif Mehmood",
+    "property_address": "Flat 302, Al-Ghafoor Tower, Gulshan-e-Iqbal Block 13-D, Karachi"
+  },
+  "system": {
+    "proposed_kw": 8.0,
+    "inverter_kw": 8.0,
+    "panel_count": 15,
+    "panel_watt": 550
+  },
+  "is_tenant": false,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "affidavit",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter"
+  ]
+}

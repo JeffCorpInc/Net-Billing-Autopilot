@@ -1,0 +1,46 @@
+{
+  "case_id": "C16",
+  "category": "trap",
+  "description": "Commercial large-system trap (300 kW): missing mandatory load-flow study",
+  "applicant_type": "commercial",
+  "cnic": {
+    "name": "Shahid Afridi",
+    "father_name": "Akhtar Hussain",
+    "cnic_no": "42101-1000555-1",
+    "expiry": "2030-10-26",
+    "address": "House 45-A, PECHS Block 2, Karachi"
+  },
+  "bill": {
+    "consumer_name": "Shahid Afridi",
+    "reference_no": "01100000073512",
+    "sanctioned_load_kw": 400.0,
+    "connected_load_kw": 400.0,
+    "tariff": "B-3",
+    "connection_phase": "3-phase",
+    "address": "House 45-A, PECHS Block 2, Karachi"
+  },
+  "ownership": {
+    "type": "sale_deed",
+    "owner_name": "Shahid Afridi",
+    "property_address": "House 45-A, PECHS Block 2, Karachi"
+  },
+  "system": {
+    "proposed_kw": 300.0,
+    "inverter_kw": 300.0,
+    "panel_count": 546,
+    "panel_watt": 550
+  },
+  "is_tenant": false,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "affidavit",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter",
+    "ntn",
+    "form_29"
+  ]
+}

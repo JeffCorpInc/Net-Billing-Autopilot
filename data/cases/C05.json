@@ -1,0 +1,44 @@
+{
+  "case_id": "C05",
+  "category": "clean",
+  "description": "Clean pack with spelling variant on deed (Mohammad Hamza Qureshi vs Muhammad Hamza Qureshi)",
+  "applicant_type": "residential",
+  "cnic": {
+    "name": "Mohammad Hamza Qureshi",
+    "father_name": "Muhammad Yaqoob",
+    "cnic_no": "42101-1000148-1",
+    "expiry": "2030-10-26",
+    "address": "House 12, Street 4, Sector 11-A, North Nazimabad, Karachi"
+  },
+  "bill": {
+    "consumer_name": "Mohammad Hamza Qureshi",
+    "reference_no": "01100000019612",
+    "sanctioned_load_kw": 10.0,
+    "connected_load_kw": 10.0,
+    "tariff": "A-1",
+    "connection_phase": "3-phase",
+    "address": "House 12, Street 4, Sector 11-A, North Nazimabad, Karachi"
+  },
+  "ownership": {
+    "type": "sale_deed",
+    "owner_name": "Muhammad Hamza Qureshi",
+    "property_address": "House 12, Street 4, Sector 11-A, North Nazimabad, Karachi"
+  },
+  "system": {
+    "proposed_kw": 8.0,
+    "inverter_kw": 8.0,
+    "panel_count": 15,
+    "panel_watt": 550
+  },
+  "is_tenant": false,
+  "docs_present": [
+    "cnic",
+    "bill",
+    "ownership",
+    "single_line_diagram",
+    "affidavit",
+    "vendor_checklist",
+    "inverter_datasheet",
+    "inverter_settings_letter"
+  ]
+}
