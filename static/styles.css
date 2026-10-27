@@ -1,0 +1,103 @@
+/* Custom CSS for Net-Billing Application Assistant */
+
+/* Typography classes */
+.font-mono-numbers {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Urdu text typography */
+[dir="rtl"], .font-urdu {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  line-height: 2.2;
+  letter-spacing: 0;
+  text-align: right;
+}
+
+/* Document Paper Textures */
+.doc-texture-paper {
+  background-color: #fbf9f4;
+  background-image: radial-gradient(#d3cabb 0.75px, transparent 0.75px);
+  background-size: 16px 16px;
+}
+
+.dark .doc-texture-paper {
+  background-color: #1a1e27;
+  background-image: radial-gradient(#2d3748 0.75px, transparent 0.75px);
+  background-size: 16px 16px;
+}
+
+/* CNIC card styling */
+.cnic-card {
+  position: relative;
+  background: linear-gradient(135deg, #065f46 0%, #047857 35%, #059669 100%);
+  color: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(6, 95, 70, 0.3);
+  overflow: hidden;
+}
+
+/* Watermark for draft PDF preview */
+.watermark-overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: rgba(148, 163, 184, 0.15);
+  transform: rotate(-30deg);
+  text-transform: uppercase;
+}
+
+/* Gauge needle smooth rotation */
+.gauge-needle {
+  transform-origin: 50% 100%;
+  transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Readiness circular progress */
+.readiness-ring-circle {
+  transition: stroke-dashoffset 1s ease-in-out;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* Smooth card transitions */
+.fade-slide-up {
+  animation: fadeSlideUp 0.3s ease-out forwards;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print optimizations */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}

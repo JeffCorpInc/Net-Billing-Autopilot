@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluation & Benchmark — NetBill Assist{% endblock %}
+{% block breadcrumb %}Evaluation{% endblock %}
+{% block page_title %}Model & Accuracy Benchmarks{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
+        <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-slate-900 dark:text-white">Evaluation Engine</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Benchmark metrics, ground truth confusion matrices, shadow agreement charts, and CSV export activate in Phase 5.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
