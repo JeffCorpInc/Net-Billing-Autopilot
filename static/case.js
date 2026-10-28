@@ -1,18 +1,23 @@
 /**
  * NetBill Assist - Case Page Client Engine
  * Handles check execution, SVG gauge needle animation, LLM accordion details,
- * cross-document field hover highlights, and staff review modal.
+ * cross-document field hover highlights, bilingual checklist, draft PDF iframe,
+ * audit trail timeline, and staff review modal.
  */
 
 const CasePage = {
   caseId: '',
   isChecking: false,
+  checklistLang: 'en',
+  currentTab: 'checklist',
+  cachedChecklist: null,
 
   init(caseId) {
     this.caseId = caseId;
     this.bindEvents();
     this.initCrossDocHover();
     this.updateGauge();
+    this.loadChecklist();
   },
 
   bindEvents() {
@@ -28,7 +33,6 @@ const CasePage = {
   },
 
   initCrossDocHover() {
-    // Cross-document hover synchronization for Names
     const nameEls = document.querySelectorAll('.cross-doc-name');
     nameEls.forEach(el => {
       el.addEventListener('mouseenter', () => {
@@ -43,7 +47,6 @@ const CasePage = {
       });
     });
 
-    // Cross-document hover synchronization for Addresses
     const addrEls = document.querySelectorAll('.cross-doc-addr');
     addrEls.forEach(el => {
       el.addEventListener('mouseenter', () => {
@@ -70,6 +73,207 @@ const CasePage = {
     } else {
       panel.classList.add('hidden');
       if (chevron) chevron.classList.remove('rotate-180');
+    }
+  },
+
+  switchTab(tab) {
+    this.currentTab = tab;
+    const tabs = ['checklist', 'draft', 'audit'];
+    tabs.forEach(t => {
+      const btn = document.getElementById(`tab-btn-${t}`);
+      const content = document.getElementById(`tab-content-${t}`);
+      if (btn && content) {
+        if (t === tab) {
+          btn.className = 'px-4 py-2.5 text-xs font-bold border-b-2 border-amber-500 text-amber-600 dark:text-amber-400 flex items-center gap-2 transition-colors';
+          content.classList.remove('hidden');
+        } else {
+          btn.className = 'px-4 py-2.5 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-2 transition-colors';
+          content.classList.add('hidden');
+        }
+      }
+    });
+
+    const controls = document.getElementById('checklist-controls');
+    if (controls) {
+      if (tab === 'checklist') controls.classList.remove('hidden');
+      else controls.classList.add('hidden');
+    }
+
+    if (tab === 'audit') {
+      this.loadAuditTrail();
+    }
+  },
+
+  setChecklistLang(lang) {
+    this.checklistLang = lang;
+    const btnEn = document.getElementById('case-lang-en');
+    const btnUr = document.getElementById('case-lang-ur');
+    if (btnEn && btnUr) {
+      if (lang === 'ur') {
+        btnUr.className = 'px-2.5 py-1 rounded-lg transition-colors bg-amber-500 text-slate-950 font-bold';
+        btnEn.className = 'px-2.5 py-1 rounded-lg transition-colors text-slate-600 dark:text-slate-400';
+      } else {
+        btnEn.className = 'px-2.5 py-1 rounded-lg transition-colors bg-amber-500 text-slate-950 font-bold';
+        btnUr.className = 'px-2.5 py-1 rounded-lg transition-colors text-slate-600 dark:text-slate-400';
+      }
+    }
+    this.loadChecklist();
+  },
+
+  async loadChecklist() {
+    const container = document.getElementById('checklist-items-container');
+    const gateBadge = document.getElementById('checklist-gate-badge');
+    const gateText = document.getElementById('checklist-gate-text');
+    const sourceBadge = document.getElementById('checklist-source-badge');
+
+    if (container) {
+      container.innerHTML = `
+        <div class="p-6 text-center text-xs text-slate-400">
+          <div class="inline-block w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+          <div>Generating customer checklist (${this.checklistLang.toUpperCase()})…</div>
+        </div>
+      `;
+    }
+
+    try {
+      const res = await fetch(`/api/checklist/${this.caseId}?lang=${this.checklistLang}`, {
+        method: 'POST'
+      });
+      if (!res.ok) throw new Error('Failed to load checklist');
+      const data = await res.json();
+      this.cachedChecklist = data;
+
+      // Update gate badge
+      if (gateBadge && gateText) {
+        if (data.gate === 'passed') {
+          gateBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800';
+          gateText.textContent = 'Verified against checks (Faithfulness Gate Passed)';
+          gateBadge.title = '';
+        } else if (data.gate === 'rejected') {
+          gateBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-help';
+          gateText.textContent = 'Template fallback: LLM output rejected by gate';
+          gateBadge.title = data.gate_reason || 'Gate rejected output';
+        } else {
+          gateBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800';
+          gateText.textContent = 'All checks passed · Ready for signature';
+        }
+      }
+
+      if (sourceBadge) {
+        sourceBadge.textContent = `SOURCE: ${data.source.toUpperCase()}`;
+      }
+
+      // Render items
+      if (container) {
+        const isUrdu = this.checklistLang === 'ur';
+        container.innerHTML = data.items.map((item, idx) => `
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 flex items-start gap-3 ${isUrdu ? 'font-urdu' : ''}" ${isUrdu ? 'dir="rtl" style="font-size: 16px; line-height: 2.2;"' : ''}>
+            <div class="w-6 h-6 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 font-sans">
+              ${idx + 1}
+            </div>
+            <div class="flex-1 text-slate-800 dark:text-slate-100">
+              ${item.text}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      if (window.lucide) window.lucide.createIcons();
+
+    } catch (err) {
+      if (container) {
+        container.innerHTML = `
+          <div class="p-4 text-xs text-rose-500 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-800">
+            Error loading checklist: ${err.message}
+          </div>
+        `;
+      }
+    }
+  },
+
+  copyChecklistText() {
+    if (!this.cachedChecklist || !this.cachedChecklist.items) return;
+    const text = this.cachedChecklist.items
+      .map((it, idx) => `${idx + 1}. ${it.text}`)
+      .join('\n\n');
+
+    navigator.clipboard.writeText(text).then(() => {
+      if (window.NetBill?.Toast) {
+        window.NetBill.Toast.show('Copied to Clipboard', 'Checklist items copied as plain text.', 'success');
+      }
+    });
+  },
+
+  async loadAuditTrail() {
+    const container = document.getElementById('audit-timeline-container');
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="p-4 text-xs text-slate-400">Loading audit history…</div>
+    `;
+
+    try {
+      const res = await fetch(`/api/audit/${this.caseId}`);
+      if (!res.ok) throw new Error('Failed to load audit history');
+      const data = await res.json();
+      const entries = data.entries || [];
+
+      if (entries.length === 0) {
+        container.innerHTML = `
+          <div class="text-xs text-slate-400 py-2">No audit events recorded for this case yet.</div>
+        `;
+        return;
+      }
+
+      const iconMap = {
+        checks_run: 'play-circle',
+        checklist_generated: 'list-checks',
+        draft_generated: 'file-text',
+        staff_review: 'user-check',
+      };
+
+      container.innerHTML = entries.map(ev => {
+        const time = new Date(ev.timestamp);
+        const timeStr = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dateStr = time.toLocaleDateString();
+        const icon = iconMap[ev.event] || 'activity';
+
+        let detailText = '';
+        if (ev.event === 'checks_run') {
+          detailText = `Ran compliance checks (${ev.details.mode} mode) → Status: <strong>${ev.details.overall}</strong> (${ev.details.readiness_score}% readiness)`;
+        } else if (ev.event === 'checklist_generated') {
+          detailText = `Customer checklist compiled in <strong>${ev.details.lang.toUpperCase()}</strong> (${ev.details.gate} gate, source: ${ev.details.source})`;
+        } else if (ev.event === 'draft_generated') {
+          detailText = `Draft PDF generated (${ev.details.disposition})`;
+        } else if (ev.event === 'staff_review') {
+          detailText = `Staff review by <strong>${ev.details.staff_name}</strong>${ev.details.note ? `: "${ev.details.note}"` : ''}`;
+        } else {
+          detailText = JSON.stringify(ev.details);
+        }
+
+        return `
+          <div class="relative pl-6 pb-2 group">
+            <div class="absolute -left-[25px] top-0 w-6 h-6 rounded-full bg-white dark:bg-slate-900 border-2 border-amber-500 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <i data-lucide="${icon}" class="w-3 h-3"></i>
+            </div>
+            <div class="flex items-center gap-2 text-[11px] text-slate-400">
+              <span class="font-mono">${dateStr} ${timeStr}</span>
+              <span>•</span>
+              <span class="uppercase font-bold tracking-wider text-[10px] text-slate-500 dark:text-slate-400">${ev.event.replace('_', ' ')}</span>
+            </div>
+            <div class="mt-1 text-slate-800 dark:text-slate-200">
+              ${detailText}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide) window.lucide.createIcons();
+
+    } catch (err) {
+      container.innerHTML = `
+        <div class="text-xs text-rose-500">Error loading audit: ${err.message}</div>
+      `;
     }
   },
 

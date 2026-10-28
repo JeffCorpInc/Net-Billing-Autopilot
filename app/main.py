@@ -211,4 +211,128 @@ async def run_checks(case_id: str, use_llm: bool = True):
     return report.model_dump()
 
 
+@app.post("/api/checklist/{case_id}")
+async def get_checklist(case_id: str, lang: str = "en"):
+    """Generate bilingual customer checklist with faithfulness gate protection."""
+    from app.audit import log_audit_event
+    from app.checklist import generate_customer_checklist
+    from app.storage import get_latest_report, get_pack
+
+    pack = get_pack(case_id)
+    if not pack:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+
+    report = get_latest_report(case_id)
+    if not report:
+        # Run checks automatically if not yet run
+        from app.llm_checks import run_l1_name_check, run_l2_address_check, run_shadow_checks
+        from app.merge import build_case_report
+        from app.rules import run_code_rules
+
+        rule_results = run_code_rules(pack)
+        l1_res = run_l1_name_check(pack)
+        l2_res = run_l2_address_check(pack)
+        report = build_case_report(
+            pack=pack,
+            rule_results=rule_results,
+            llm_results=[l1_res, l2_res],
+            shadow_checks=run_shadow_checks(pack),
+        )
+
+    checklist_res = generate_customer_checklist(case_id=case_id, report=report, lang=lang)
+
+    # Log to audit trail
+    log_audit_event(
+        case_id=case_id,
+        event_type="checklist_generated",
+        details={
+            "lang": lang,
+            "gate": checklist_res.gate,
+            "gate_reason": checklist_res.gate_reason,
+            "item_count": len(checklist_res.items),
+            "source": checklist_res.source,
+        },
+    )
+
+    return checklist_res.model_dump()
+
+
+@app.get("/api/draft/{case_id}")
+async def get_draft_pdf(case_id: str, download: int = 0):
+    """Generate and serve draft application PDF (inline or attachment)."""
+    from fastapi.responses import Response
+    from app.audit import log_audit_event
+    from app.draft_pdf import generate_draft_pdf_bytes
+    from app.storage import get_latest_report, get_pack
+
+    pack = get_pack(case_id)
+    if not pack:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+
+    report = get_latest_report(case_id)
+    pdf_bytes = generate_draft_pdf_bytes(pack=pack, report=report)
+
+    disposition = "attachment" if download == 1 else "inline"
+    filename = f"draft_{case_id}.pdf"
+
+    log_audit_event(
+        case_id=case_id,
+        event_type="draft_generated",
+        details={"disposition": disposition, "size_bytes": len(pdf_bytes)},
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'{disposition}; filename="{filename}"'},
+    )
+
+
+@app.post("/api/review/{case_id}")
+async def submit_review(case_id: str, request: Request):
+    """Mark case reviewed by onboarding staff member."""
+    from app.audit import record_staff_review
+    from app.storage import get_latest_report, get_pack
+
+    pack = get_pack(case_id)
+    if not pack:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+
+    report = get_latest_report(case_id)
+    if not report:
+        raise HTTPException(
+            status_code=400,
+            detail="Staff review is permitted only after compliance checks have been executed.",
+        )
+
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+
+    staff_name = str(data.get("staff_name", "")).strip()
+    note = str(data.get("note", "")).strip()
+
+    if not staff_name:
+        raise HTTPException(status_code=400, detail="Staff name is required.")
+
+    record = record_staff_review(case_id=case_id, staff_name=staff_name, note=note)
+    return {"status": "ok", "review": record}
+
+
+@app.get("/api/audit/{case_id}")
+async def get_audit_trail_endpoint(case_id: str):
+    """Retrieve full audit log trail for a case."""
+    from app.audit import get_case_audit_trail
+    from app.storage import get_pack
+
+    pack = get_pack(case_id)
+    if not pack:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+
+    trail = get_case_audit_trail(case_id)
+    return {"case_id": case_id, "entries": trail}
+
+
+
 

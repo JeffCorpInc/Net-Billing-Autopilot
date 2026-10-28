@@ -83,3 +83,17 @@ class CaseReport(BaseModel):
     readiness_score: float
     results: list[CheckResult] = Field(default_factory=list)
     shadow_checks: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class ChecklistItem(BaseModel):
+    check_id: str
+    text: str
+
+
+class ChecklistResult(BaseModel):
+    lang: Literal["en", "ur"]
+    items: list[ChecklistItem] = Field(default_factory=list)
+    gate: Literal["passed", "rejected", "skipped"]
+    gate_reason: str | None = None
+    source: Literal["llm", "mock-llm", "template-fallback", "code"] = "code"
+

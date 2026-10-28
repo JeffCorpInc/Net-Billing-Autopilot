@@ -569,6 +569,107 @@
     </div>
   </div>
 
+  <!-- SECTION C: Customer Checklist, Draft PDF, and Audit Trail (Tabs) -->
+  <div class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
+        <i data-lucide="file-check-2" class="w-4 h-4 text-amber-500"></i>
+        <span>Section C — Customer Output &amp; Compliance Audit</span>
+      </h3>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+      <!-- Tabs Navigation Header -->
+      <div class="border-b border-slate-200 dark:border-slate-800 px-6 pt-3 flex items-center justify-between gap-4 flex-wrap bg-slate-50/50 dark:bg-slate-850">
+        <div class="flex items-center gap-1 sm:gap-2">
+          <button id="tab-btn-checklist" type="button" onclick="CasePage.switchTab('checklist')" class="px-4 py-2.5 text-xs font-bold border-b-2 border-amber-500 text-amber-600 dark:text-amber-400 flex items-center gap-2 transition-colors">
+            <i data-lucide="list-checks" class="w-4 h-4"></i>
+            <span>Customer Checklist</span>
+          </button>
+          <button id="tab-btn-draft" type="button" onclick="CasePage.switchTab('draft')" class="px-4 py-2.5 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-2 transition-colors">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            <span>Draft Application (PDF)</span>
+          </button>
+          <button id="tab-btn-audit" type="button" onclick="CasePage.switchTab('audit')" class="px-4 py-2.5 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-2 transition-colors">
+            <i data-lucide="history" class="w-4 h-4"></i>
+            <span>Audit Trail</span>
+          </button>
+        </div>
+
+        <!-- Language toggle for Checklist Tab -->
+        <div id="checklist-controls" class="flex items-center gap-2 pb-2 sm:pb-0">
+          <div class="flex items-center bg-slate-200/70 dark:bg-slate-800 p-0.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold">
+            <button id="case-lang-en" type="button" onclick="CasePage.setChecklistLang('en')" class="px-2.5 py-1 rounded-lg transition-colors bg-amber-500 text-slate-950">English</button>
+            <button id="case-lang-ur" type="button" onclick="CasePage.setChecklistLang('ur')" class="px-2.5 py-1 rounded-lg transition-colors text-slate-600 dark:text-slate-400">اردو</button>
+          </div>
+          <button type="button" onclick="CasePage.loadChecklist()" class="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1 border border-slate-200 dark:border-slate-700">
+            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+            <span>Regenerate</span>
+          </button>
+          <button type="button" onclick="CasePage.copyChecklistText()" class="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1 border border-slate-200 dark:border-slate-700">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            <span>Copy Text</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="p-6">
+        
+        <!-- Tab 1: Customer Checklist -->
+        <div id="tab-content-checklist" class="space-y-4">
+          <!-- Gate Status Banner -->
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 text-xs">
+            <div id="checklist-gate-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+              <span id="checklist-gate-text">Verified against regulatory checks</span>
+            </div>
+            <span id="checklist-source-badge" class="font-mono text-[11px] text-slate-400">SOURCE: LLM</span>
+          </div>
+
+          <!-- Checklist Items Container -->
+          <div id="checklist-items-container" class="space-y-3 min-h-[140px]">
+            <div class="animate-pulse space-y-2">
+              <div class="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
+              <div class="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Draft Application PDF -->
+        <div id="tab-content-draft" class="hidden space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800 text-xs">
+            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+              <i data-lucide="shield-alert" class="w-4 h-4 text-amber-500 shrink-0"></i>
+              <span><strong>Pre-filled Draft:</strong> Customer must review and sign. Staff submit through DISCO portal.</span>
+            </div>
+            <a id="download-draft-link" href="/api/draft/{{ pack.case_id }}?download=1" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-2 shadow self-start sm:self-auto">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Download PDF</span>
+            </a>
+          </div>
+
+          <div class="w-full bg-slate-100 dark:bg-slate-950 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-inner">
+            <iframe id="draft-pdf-frame" src="/api/draft/{{ pack.case_id }}" class="w-full h-[700px] border-0" title="Draft Application Preview"></iframe>
+          </div>
+        </div>
+
+        <!-- Tab 3: Audit Trail -->
+        <div id="tab-content-audit" class="hidden space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 text-xs">
+            <span class="font-bold text-slate-700 dark:text-slate-300">Chronological Event Timeline</span>
+            <span class="text-slate-400">Append-only audit trail</span>
+          </div>
+
+          <div id="audit-timeline-container" class="space-y-4 pl-4 border-l-2 border-slate-200 dark:border-slate-800 text-xs">
+            <!-- Dynamic audit events inserted here -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </div>
 {% endblock %}
 
