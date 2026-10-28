@@ -37,12 +37,25 @@ const CasePage = {
     nameEls.forEach(el => {
       el.addEventListener('mouseenter', () => {
         nameEls.forEach(n => {
-          n.classList.add('ring-2', 'ring-amber-400', 'bg-amber-100/50', 'dark:bg-amber-950/40');
+          const isCnic = n.id === 'cross-name-cnic';
+          n.classList.add('ring-2', 'ring-amber-400');
+          if (isCnic) {
+            n.classList.add('bg-amber-500/25', 'text-white');
+          } else {
+            n.classList.add('bg-amber-100/70', 'dark:bg-amber-950/50');
+          }
         });
       });
       el.addEventListener('mouseleave', () => {
         nameEls.forEach(n => {
-          n.classList.remove('ring-2', 'ring-amber-400', 'bg-amber-100/50', 'dark:bg-amber-950/40');
+          n.classList.remove(
+            'ring-2',
+            'ring-amber-400',
+            'bg-amber-500/25',
+            'text-white',
+            'bg-amber-100/70',
+            'dark:bg-amber-950/50'
+          );
         });
       });
     });
@@ -51,12 +64,25 @@ const CasePage = {
     addrEls.forEach(el => {
       el.addEventListener('mouseenter', () => {
         addrEls.forEach(a => {
-          a.classList.add('ring-2', 'ring-teal-400', 'bg-teal-100/50', 'dark:bg-teal-950/40');
+          const isCnic = a.id === 'cross-addr-cnic';
+          a.classList.add('ring-2', 'ring-teal-400');
+          if (isCnic) {
+            a.classList.add('bg-teal-500/25', 'text-white');
+          } else {
+            a.classList.add('bg-teal-100/70', 'dark:bg-teal-950/50');
+          }
         });
       });
       el.addEventListener('mouseleave', () => {
         addrEls.forEach(a => {
-          a.classList.remove('ring-2', 'ring-teal-400', 'bg-teal-100/50', 'dark:bg-teal-950/40');
+          a.classList.remove(
+            'ring-2',
+            'ring-teal-400',
+            'bg-teal-500/25',
+            'text-white',
+            'bg-teal-100/70',
+            'dark:bg-teal-950/50'
+          );
         });
       });
     });
