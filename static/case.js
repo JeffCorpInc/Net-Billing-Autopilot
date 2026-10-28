@@ -1,6 +1,7 @@
 /**
  * NetBill Assist - Case Page Client Engine
- * Handles check execution, SVG gauge needle animation, readiness ring update, and review modal.
+ * Handles check execution, SVG gauge needle animation, LLM accordion details,
+ * cross-document field hover highlights, and staff review modal.
  */
 
 const CasePage = {
@@ -10,6 +11,7 @@ const CasePage = {
   init(caseId) {
     this.caseId = caseId;
     this.bindEvents();
+    this.initCrossDocHover();
     this.updateGauge();
   },
 
@@ -25,6 +27,52 @@ const CasePage = {
     }
   },
 
+  initCrossDocHover() {
+    // Cross-document hover synchronization for Names
+    const nameEls = document.querySelectorAll('.cross-doc-name');
+    nameEls.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        nameEls.forEach(n => {
+          n.classList.add('ring-2', 'ring-amber-400', 'bg-amber-100/50', 'dark:bg-amber-950/40');
+        });
+      });
+      el.addEventListener('mouseleave', () => {
+        nameEls.forEach(n => {
+          n.classList.remove('ring-2', 'ring-amber-400', 'bg-amber-100/50', 'dark:bg-amber-950/40');
+        });
+      });
+    });
+
+    // Cross-document hover synchronization for Addresses
+    const addrEls = document.querySelectorAll('.cross-doc-addr');
+    addrEls.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        addrEls.forEach(a => {
+          a.classList.add('ring-2', 'ring-teal-400', 'bg-teal-100/50', 'dark:bg-teal-950/40');
+        });
+      });
+      el.addEventListener('mouseleave', () => {
+        addrEls.forEach(a => {
+          a.classList.remove('ring-2', 'ring-teal-400', 'bg-teal-100/50', 'dark:bg-teal-950/40');
+        });
+      });
+    });
+  },
+
+  toggleLLMDetails(checkId) {
+    const panel = document.getElementById(`llm-panel-${checkId}`);
+    const chevron = document.getElementById(`chevron-${checkId}`);
+    if (!panel) return;
+
+    if (panel.classList.contains('hidden')) {
+      panel.classList.remove('hidden');
+      if (chevron) chevron.classList.add('rotate-180');
+    } else {
+      panel.classList.add('hidden');
+      if (chevron) chevron.classList.remove('rotate-180');
+    }
+  },
+
   async runChecks() {
     if (this.isChecking) return;
     this.isChecking = true;
@@ -34,14 +82,14 @@ const CasePage = {
     const spinner = document.getElementById('case-run-spinner');
 
     if (btn) btn.disabled = true;
-    if (btnText) btnText.textContent = 'Running Checks…';
+    if (btnText) btnText.textContent = 'Running Checks (with LLM)…';
     if (spinner) spinner.classList.remove('hidden');
 
     try {
-      const res = await fetch(`/api/check/${this.caseId}?use_llm=false`, {
+      const res = await fetch(`/api/check/${this.caseId}?use_llm=true`, {
         method: 'POST'
       });
-      if (!res.ok) throw new Error('Failed to run regulatory checks');
+      if (!res.ok) throw new Error('Failed to run regulatory and LLM checks');
       const report = await res.json();
 
       if (window.NetBill?.Toast) {
@@ -52,7 +100,6 @@ const CasePage = {
         );
       }
 
-      // Reload page to re-render all check states, gauges, outlines and badges
       setTimeout(() => {
         window.location.reload();
       }, 500);
@@ -62,7 +109,7 @@ const CasePage = {
         window.NetBill.Toast.show('Error', err.message, 'error');
       }
       if (btn) btn.disabled = false;
-      if (btnText) btnText.textContent = 'Run Checks';
+      if (btnText) btnText.textContent = 'Run Checks (with LLM)';
       if (spinner) spinner.classList.add('hidden');
       this.isChecking = false;
     }
@@ -75,7 +122,6 @@ const CasePage = {
     const proposed = parseFloat(gaugeNeedle.getAttribute('data-proposed') || '0');
     const sanctioned = parseFloat(gaugeNeedle.getAttribute('data-sanctioned') || '10');
 
-    // Semicircle gauge: 0 kW = -90deg, sanctioned = 0deg, 1.5*sanctioned = +90deg
     const maxVal = Math.max(sanctioned * 1.5, proposed * 1.1, 15);
     const ratio = Math.min(proposed / maxVal, 1.0);
     const degrees = -90 + (ratio * 180);

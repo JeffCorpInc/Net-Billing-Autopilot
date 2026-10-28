@@ -83,5 +83,6 @@ class Settings(BaseModel):
 
 def get_settings() -> Settings:
     """Retrieve application settings snapshot."""
-    load_dotenv(BASE_DIR / ".env", override=True)
+    load_dotenv(BASE_DIR / ".env", override=False)
     return Settings()
+

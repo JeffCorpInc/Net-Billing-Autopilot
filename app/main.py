@@ -180,8 +180,9 @@ async def get_case_detail(case_id: str):
 
 
 @app.post("/api/check/{case_id}")
-async def run_checks(case_id: str, use_llm: bool = False):
-    """Run compliance checks (R1-R7 deterministic + L1/L2 if use_llm=true) on a case."""
+async def run_checks(case_id: str, use_llm: bool = True):
+    """Run compliance checks (R1-R7 deterministic + L1/L2 and shadow if use_llm=true) on a case."""
+    from app.llm_checks import run_l1_name_check, run_l2_address_check, run_shadow_checks
     from app.merge import build_case_report
     from app.rules import run_code_rules
     from app.storage import get_pack
@@ -195,7 +196,12 @@ async def run_checks(case_id: str, use_llm: bool = False):
     llm_results = []
     shadow_checks = []
 
-    # In Phase 3, if use_llm=True, llm_checks will be executed here.
+    if use_llm:
+        l1_res = run_l1_name_check(pack)
+        l2_res = run_l2_address_check(pack)
+        llm_results = [l1_res, l2_res]
+        shadow_checks = run_shadow_checks(pack)
+
     report = build_case_report(
         pack=pack,
         rule_results=rule_results,
@@ -203,5 +209,6 @@ async def run_checks(case_id: str, use_llm: bool = False):
         shadow_checks=shadow_checks,
     )
     return report.model_dump()
+
 
 
