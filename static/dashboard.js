@@ -20,12 +20,12 @@ function getStatusBadge(status) {
     NOT_READY: {
       bg: 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800',
       icon: 'octagon-x',
-      label: 'NOT READY'
+      label: 'ISSUES'
     },
     NEEDS_REVIEW: {
       bg: 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
       icon: 'alert-triangle',
-      label: 'NEEDS REVIEW'
+      label: 'REVIEW'
     },
     PENDING: {
       bg: 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700',
@@ -36,7 +36,7 @@ function getStatusBadge(status) {
 
   const item = map[status] || map.PENDING;
   return `
-    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${item.bg}">
+    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border whitespace-nowrap ${item.bg}">
       <i data-lucide="${item.icon}" class="w-3.5 h-3.5 shrink-0"></i>
       <span>${item.label}</span>
     </span>
@@ -219,7 +219,7 @@ function renderTable() {
       </td>
 
       <!-- Overall Status Chip -->
-      <td class="py-3.5 px-4">
+      <td class="py-3.5 px-4 whitespace-nowrap">
         ${getStatusBadge(c.overall)}
       </td>
 
