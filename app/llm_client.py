@@ -243,6 +243,103 @@ def complete_json(
         )
         return mock_output, meta
 
+    # Provider: gemini (native Google Generative AI REST API)
+    if provider == "gemini":
+        if not settings.llm_api_key:
+            meta["error"] = "LLM_API_KEY not set for Gemini provider"
+            _log_llm_call(
+                case_id=case_id, task=task, provider="gemini", model=model,
+                prompt_text=system + "\n" + user, redacted_input=user,
+                raw_output="", latency_ms=0, ok=False, error=meta["error"],
+            )
+            return None, meta
+
+        try:
+            import httpx as _httpx
+        except ImportError:
+            meta["error"] = "httpx package not installed"
+            return None, meta
+
+        gemini_model = settings.llm_model or "gemini-flash-lite-latest"
+        fallback_models = [
+            gemini_model,
+            "gemini-flash-lite-latest",
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-flash-lite",
+            "gemini-3-flash-preview",
+        ]
+        # Deduplicate while preserving order
+        model_chain = list(dict.fromkeys(fallback_models))
+
+        payload: dict[str, Any] = {
+            "systemInstruction": {"parts": [{"text": system}]},
+            "contents": [{"parts": [{"text": user}]}],
+            "generationConfig": {
+                "temperature": temperature,
+                "responseMimeType": "application/json",
+            },
+        }
+
+        parsed: dict[str, Any] | None = None
+        raw_text = ""
+        used_model = gemini_model
+        backoff_delays = [0.5, 1.5]
+
+        for attempt in range(settings.llm_max_retries + 1):
+            meta["attempts"] = attempt + 1
+            used_model = model_chain[min(attempt, len(model_chain) - 1)]
+            meta["model"] = used_model
+            api_url = (
+                f"https://generativelanguage.googleapis.com/v1beta/"
+                f"models/{used_model}:generateContent"
+            )
+            try:
+                resp = _httpx.post(
+                    api_url,
+                    params={"key": settings.llm_api_key.strip()},
+                    json=payload,
+                    timeout=settings.llm_timeout_seconds,
+                )
+                if resp.status_code != 200:
+                    error_body = resp.text[:300]
+                    meta["error"] = f"Gemini API {resp.status_code} ({used_model}): {error_body}"
+                    if attempt < settings.llm_max_retries:
+                        time.sleep(backoff_delays[min(attempt, len(backoff_delays) - 1)])
+                    continue
+
+                resp_json = resp.json()
+                candidates = resp_json.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    text_parts = [
+                        p.get("text", "")
+                        for p in parts
+                        if not p.get("thought") and p.get("text")
+                    ]
+                    raw_text = "\n".join(text_parts) if text_parts else (parts[0].get("text", "") if parts else "")
+
+                parsed = _extract_json_block(raw_text)
+                if parsed is not None:
+                    meta["ok"] = True
+                    meta["error"] = None
+                    break
+                else:
+                    meta["error"] = "Failed to parse JSON from Gemini response"
+            except Exception as exc:
+                meta["error"] = str(exc)
+                if attempt < settings.llm_max_retries:
+                    time.sleep(backoff_delays[min(attempt, len(backoff_delays) - 1)])
+
+        latency = int((time.perf_counter() - start_time) * 1000)
+        meta["latency_ms"] = latency
+        _log_llm_call(
+            case_id=case_id, task=task, provider="gemini", model=used_model,
+            prompt_text=system + "\n" + user, redacted_input=user,
+            raw_output=raw_text, latency_ms=latency,
+            ok=meta["ok"], error=meta["error"],
+        )
+        return parsed, meta
+
     # Provider: openai_compatible
     if provider == "openai_compatible":
         if not settings.is_llm_configured:
@@ -280,9 +377,9 @@ def complete_json(
             {"role": "user", "content": user},
         ]
 
-        parsed: dict[str, Any] | None = None
-        raw_text = ""
-        backoff_delays = [1.0, 3.0]
+        parsed_oai: dict[str, Any] | None = None
+        raw_text_oai = ""
+        backoff_delays_oai = [1.0, 3.0]
 
         for attempt in range(settings.llm_max_retries + 1):
             meta["attempts"] = attempt + 1
@@ -303,9 +400,9 @@ def complete_json(
                         temperature=temperature,
                     )
 
-                raw_text = response.choices[0].message.content or ""
-                parsed = _extract_json_block(raw_text)
-                if parsed is not None:
+                raw_text_oai = response.choices[0].message.content or ""
+                parsed_oai = _extract_json_block(raw_text_oai)
+                if parsed_oai is not None:
                     meta["ok"] = True
                     break
                 else:
@@ -313,7 +410,7 @@ def complete_json(
             except Exception as exc:
                 meta["error"] = str(exc)
                 if attempt < settings.llm_max_retries:
-                    time.sleep(backoff_delays[min(attempt, len(backoff_delays) - 1)])
+                    time.sleep(backoff_delays_oai[min(attempt, len(backoff_delays_oai) - 1)])
 
         latency = int((time.perf_counter() - start_time) * 1000)
         meta["latency_ms"] = latency
@@ -324,12 +421,12 @@ def complete_json(
             model=settings.llm_model,
             prompt_text=system + "\n" + user,
             redacted_input=user,
-            raw_output=raw_text,
+            raw_output=raw_text_oai,
             latency_ms=latency,
             ok=meta["ok"],
             error=meta["error"],
         )
-        return parsed, meta
+        return parsed_oai, meta
 
     # Unknown provider
     meta["error"] = f"Unknown provider: {provider}"

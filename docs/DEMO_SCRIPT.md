@@ -154,3 +154,4 @@
 - [x] ReportLab watermarked draft PDF inspected with zero LLM text.
 - [x] 9 Evaluation KPIs and 4 Chart.js charts presented.
 - [x] Append-only audit trail sign-off shown.
+

@@ -68,6 +68,8 @@ class Settings(BaseModel):
     @property
     def is_llm_configured(self) -> bool:
         """Whether a live LLM API key or local base_url is configured."""
+        if self.llm_provider == "gemini":
+            return bool(self.llm_api_key)
         if self.llm_provider == "openai_compatible":
             return bool(self.llm_api_key or self.llm_base_url)
         return False
@@ -75,7 +77,7 @@ class Settings(BaseModel):
     @property
     def mode(self) -> str:
         """Active operational mode: live, mock, or fallback."""
-        if self.llm_provider == "openai_compatible" and self.is_llm_configured:
+        if self.llm_provider in ("gemini", "openai_compatible") and self.is_llm_configured:
             return "live"
         if self.llm_provider == "mock":
             return "mock"

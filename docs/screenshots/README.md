@@ -21,3 +21,4 @@ This folder contains visual artifacts and screenshots documenting key screens of
 
 ## Capturing Instructions
 Screenshots can be taken at standard 1080p desktop resolution (`1920x1080`) in either light or dark mode.
+
