@@ -17,13 +17,13 @@ def client():
 
 
 def test_cases_endpoint_returns_21(client):
-    """Verify /api/cases returns exactly 21 cases."""
+    """Verify /api/cases includes all 21 benchmark cases C01..C21."""
     res = client.get("/api/cases")
     assert res.status_code == 200
     data = res.json()
-    assert len(data) == 21
-    case_ids = [c["case_id"] for c in data]
-    assert case_ids == [f"C{i:02d}" for i in range(1, 22)]
+    builtin_ids = [c["case_id"] for c in data if c["case_id"].startswith("C")]
+    assert len(builtin_ids) == 21
+    assert builtin_ids == [f"C{i:02d}" for i in range(1, 22)]
 
 
 def test_pack_schema_validation(client):
@@ -135,20 +135,45 @@ def test_create_and_delete_custom_case(client):
     assert created["report"]["overall"] == "READY"
 
     try:
-        # Verify upload endpoint works
+        # Verify upload endpoint works with base64 content
+        import base64
+        sample_pdf_b64 = base64.b64encode(b"%PDF-1.4 fake scan bytes").decode("ascii")
         up_res = client.post(
             f"/api/cases/{case_id}/upload",
-            json={"files": [{"name": "cnic_scan.pdf", "size": 24576}]},
+            json={"files": [{"name": "cnic_scan.pdf", "size": 24, "content_base64": sample_pdf_b64}]},
         )
         assert up_res.status_code == 200
         assert len(up_res.json()["files"]) == 1
+
+        # Verify uploaded file can be viewed/downloaded
+        view_res = client.get(f"/api/cases/{case_id}/files/cnic_scan.pdf")
+        assert view_res.status_code == 200
+        assert view_res.content == b"%PDF-1.4 fake scan bytes"
+
+        # Verify edit page renders pre-populated
+        edit_page_res = client.get(f"/case/{case_id}/edit")
+        assert edit_page_res.status_code == 200
+        assert "Update Customer" in edit_page_res.text
+
+        # Verify PUT /api/cases/{case_id} updates the pack and re-runs checks
+        payload["system"]["proposed_kw"] = 14.0  # Exceeds 10.0 kW sanctioned load -> NOT_READY
+        put_res = client.put(f"/api/cases/{case_id}", json=payload)
+        assert put_res.status_code == 200
+        assert put_res.json()["report"]["overall"] == "NOT_READY"
+
+        # Verify deleting individual uploaded file works
+        del_file_res = client.delete(f"/api/cases/{case_id}/files/cnic_scan.pdf")
+        assert del_file_res.status_code == 200
+        assert len(del_file_res.json()["files"]) == 0
 
         # Verify case detail page renders
         case_page_res = client.get(f"/case/{case_id}")
         assert case_page_res.status_code == 200
         assert "Tariq Jamil" in case_page_res.text
 
-        # Built-in cases cannot be deleted
+        # Built-in cases cannot be edited or deleted
+        bad_put = client.put("/api/cases/C01", json=payload)
+        assert bad_put.status_code == 400
         bad_del = client.delete("/api/cases/C01")
         assert bad_del.status_code == 400
     finally:

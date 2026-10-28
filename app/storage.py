@@ -121,6 +121,40 @@ def list_uploaded_files(case_id: str) -> list[dict[str, Any]]:
     return files
 
 
+def save_uploaded_file(case_id: str, filename: str, content_bytes: bytes) -> dict[str, Any]:
+    """Save an uploaded document file for a case."""
+    safe_name = Path(filename).name
+    if not safe_name:
+        safe_name = "document.pdf"
+    case_uploads = UPLOADS_DIR / case_id
+    case_uploads.mkdir(parents=True, exist_ok=True)
+    target = case_uploads / safe_name
+    target.write_bytes(content_bytes)
+    return {
+        "filename": safe_name,
+        "size_kb": round(target.stat().st_size / 1024, 1),
+    }
+
+
+def delete_uploaded_file(case_id: str, filename: str) -> bool:
+    """Delete a specific uploaded document file from a case."""
+    safe_name = Path(filename).name
+    target = UPLOADS_DIR / case_id / safe_name
+    if not target.exists() or not target.is_file():
+        return False
+    target.unlink(missing_ok=True)
+    return True
+
+
+def get_uploaded_file_path(case_id: str, filename: str) -> Path | None:
+    """Return path to an uploaded file if it exists."""
+    safe_name = Path(filename).name
+    target = UPLOADS_DIR / case_id / safe_name
+    if target.exists() and target.is_file():
+        return target
+    return None
+
+
 def get_latest_report(case_id: str) -> CaseReport | None:
     """Load latest CaseReport if available."""
     report_file = REPORTS_DIR / f"{case_id}.json"

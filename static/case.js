@@ -35,6 +35,11 @@ const CasePage = {
     if (deleteBtn) {
       deleteBtn.addEventListener('click', () => this.deleteCustomCase());
     }
+
+    const quickUploadInput = document.getElementById('case-quick-upload-input');
+    if (quickUploadInput) {
+      quickUploadInput.addEventListener('change', (e) => this.handleQuickUpload(e));
+    }
   },
 
   initCrossDocHover() {
@@ -247,7 +252,9 @@ const CasePage = {
 
       const iconMap = {
         case_created: 'file-plus-2',
+        case_updated: 'pencil',
         files_uploaded: 'paperclip',
+        file_deleted: 'trash-2',
         checks_run: 'play-circle',
         checklist_generated: 'list-checks',
         draft_generated: 'file-text',
@@ -264,8 +271,12 @@ const CasePage = {
         let detailText = '';
         if (ev.event === 'case_created') {
           detailText = `Custom application pack created for <strong>${d.applicant_name || 'Applicant'}</strong> (${d.proposed_kw ?? 0} kW system, ${d.docs_count ?? 0} docs attached)`;
+        } else if (ev.event === 'case_updated') {
+          detailText = `Application details updated for <strong>${d.applicant_name || 'Applicant'}</strong> (${d.proposed_kw ?? 0} kW system, ${d.docs_count ?? 0} docs attached)`;
         } else if (ev.event === 'files_uploaded') {
           detailText = `Uploaded ${d.count ?? 0} supporting scan(s): <strong>${(d.files || []).join(', ')}</strong>`;
+        } else if (ev.event === 'file_deleted') {
+          detailText = `Removed uploaded scan: <strong>${d.filename || 'file'}</strong>`;
         } else if (ev.event === 'checks_run') {
           detailText = `Ran compliance checks (${d.mode || 'code'} mode) → Status: <strong>${d.overall || 'PENDING'}</strong> (${d.readiness_score ?? 0}% readiness)`;
         } else if (ev.event === 'checklist_generated') {
@@ -429,6 +440,65 @@ const CasePage = {
         }
       }
     );
+  },
+
+  async handleQuickUpload(e) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const readFileAsBase64 = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    try {
+      const filesPayload = [];
+      for (const f of files) {
+        const b64 = await readFileAsBase64(f);
+        filesPayload.push({
+          name: f.name,
+          size: f.size,
+          type: f.type,
+          content_base64: b64,
+        });
+      }
+
+      const res = await fetch(`/api/cases/${this.caseId}/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ files: filesPayload }),
+      });
+
+      if (!res.ok) throw new Error('Failed to upload document scan(s)');
+      if (window.NetBill?.Toast) {
+        window.NetBill.Toast.show('Uploaded', `Added ${files.length} document scan(s).`, 'success');
+      }
+      setTimeout(() => window.location.reload(), 400);
+    } catch (err) {
+      if (window.NetBill?.Toast) {
+        window.NetBill.Toast.show('Upload Error', err.message, 'error');
+      }
+    }
+  },
+
+  async deleteUploadedFile(filename) {
+    if (!filename) return;
+    try {
+      const res = await fetch(`/api/cases/${this.caseId}/files/${encodeURIComponent(filename)}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Failed to delete uploaded file');
+      if (window.NetBill?.Toast) {
+        window.NetBill.Toast.show('File Deleted', `Removed ${filename}`, 'success');
+      }
+      setTimeout(() => window.location.reload(), 350);
+    } catch (err) {
+      if (window.NetBill?.Toast) {
+        window.NetBill.Toast.show('Error', err.message, 'error');
+      }
+    }
   }
 };
 

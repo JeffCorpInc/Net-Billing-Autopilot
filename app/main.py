@@ -104,6 +104,36 @@ async def new_case_page(request: Request):
     context.update({
         "active_page": "new_case",
         "next_case_id": next_custom_case_id(),
+        "edit_mode": False,
+        "pack_json": "null",
+        "existing_files": [],
+    })
+    return templates.TemplateResponse(request=request, name="new_case.html", context=context)
+
+
+@app.get("/case/{case_id}/edit", response_class=HTMLResponse)
+@app.get("/cases/{case_id}/edit", response_class=HTMLResponse)
+async def edit_case_page(request: Request, case_id: str):
+    """Render guided intake form in Edit Mode for an existing custom case."""
+    import json
+    from app.storage import get_pack, list_uploaded_files
+    if not case_id.upper().startswith("U"):
+        raise HTTPException(
+            status_code=400,
+            detail="Built-in benchmark cases (C01-C21) are read-only. Create a custom case to edit.",
+        )
+    pack = get_pack(case_id)
+    if not pack:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+
+    context = get_base_context(request)
+    context.update({
+        "active_page": "new_case",
+        "next_case_id": pack.case_id,
+        "edit_mode": True,
+        "pack": pack,
+        "pack_json": json.dumps(pack.model_dump()),
+        "existing_files": list_uploaded_files(case_id),
     })
     return templates.TemplateResponse(request=request, name="new_case.html", context=context)
 
@@ -242,39 +272,150 @@ async def create_new_case(request: Request):
     }
 
 
+@app.put("/api/cases/{case_id}")
+async def update_existing_case(case_id: str, request: Request):
+    """Update an existing custom user application pack, re-run compliance checks, and persist."""
+    from app.audit import log_audit_event
+    from app.llm_checks import run_l1_name_check, run_l2_address_check, run_shadow_checks
+    from app.merge import build_case_report
+    from app.models import Pack
+    from app.rules import run_code_rules
+    from app.storage import get_pack, save_custom_pack
+
+    if not case_id.upper().startswith("U"):
+        raise HTTPException(
+            status_code=400,
+            detail="Built-in benchmark cases (C01-C21) cannot be modified.",
+        )
+
+    existing_pack = get_pack(case_id)
+    if not existing_pack:
+        raise HTTPException(status_code=404, detail=f"Custom case {case_id} not found")
+
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+    payload["case_id"] = existing_pack.case_id
+    if not payload.get("category"):
+        payload["category"] = existing_pack.category
+    if not payload.get("description"):
+        payload["description"] = existing_pack.description
+
+    try:
+        pack = Pack.model_validate(payload)
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Validation error: {exc}")
+
+    rule_results = run_code_rules(pack)
+    l1_res = run_l1_name_check(pack)
+    l2_res = run_l2_address_check(pack)
+    llm_results = [l1_res, l2_res]
+    shadow_checks = run_shadow_checks(pack)
+
+    any_fail = any(r.status == "FAIL" for r in (rule_results + llm_results))
+    pack.category = "trap" if any_fail else "clean"
+
+    save_custom_pack(pack)
+
+    log_audit_event(
+        case_id=pack.case_id,
+        event_type="case_updated",
+        details={
+            "applicant_name": pack.cnic.name,
+            "proposed_kw": pack.system.proposed_kw,
+            "docs_count": len(pack.docs_present),
+        },
+    )
+
+    report = build_case_report(
+        pack=pack,
+        rule_results=rule_results,
+        llm_results=llm_results,
+        shadow_checks=shadow_checks,
+    )
+
+    return {
+        "status": "ok",
+        "case_id": pack.case_id,
+        "pack": pack.model_dump(),
+        "report": report.model_dump(),
+    }
+
+
 @app.post("/api/cases/{case_id}/upload")
 async def upload_case_files(case_id: str, request: Request):
-    """Save optional uploaded document files (metadata or multipart) for a custom case."""
+    """Save uploaded document files (base64 or metadata) for a case."""
+    import base64
     from app.audit import log_audit_event
-    from app.config import UPLOADS_DIR
-    from app.storage import get_pack, list_uploaded_files
+    from app.storage import get_pack, list_uploaded_files, save_uploaded_file
 
     pack = get_pack(case_id)
     if not pack:
         raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
 
-    case_upload_dir = UPLOADS_DIR / case_id
-    case_upload_dir.mkdir(parents=True, exist_ok=True)
-
+    uploaded_names = []
     try:
         data = await request.json()
         files_meta = data.get("files", [])
         for fmeta in files_meta:
             safe_name = Path(str(fmeta.get("name", "document.pdf"))).name
-            content_summary = f"Uploaded file placeholder: {safe_name} ({fmeta.get('size', 0)} bytes)"
-            (case_upload_dir / safe_name).write_text(content_summary, encoding="utf-8")
-    except Exception:
-        pass
+            b64_data = fmeta.get("content_base64")
+            if b64_data:
+                # Strip data URI prefix if present
+                if "," in b64_data:
+                    b64_data = b64_data.split(",", 1)[1]
+                raw_bytes = base64.b64decode(b64_data)
+            else:
+                raw_bytes = f"Uploaded file placeholder: {safe_name} ({fmeta.get('size', 0)} bytes)".encode("utf-8")
+            save_uploaded_file(case_id, safe_name, raw_bytes)
+            uploaded_names.append(safe_name)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Upload failed: {exc}")
 
     saved = list_uploaded_files(case_id)
-    if saved:
+    if uploaded_names:
         log_audit_event(
             case_id=case_id,
             event_type="files_uploaded",
-            details={"count": len(saved), "files": [f["filename"] for f in saved]},
+            details={"count": len(uploaded_names), "files": uploaded_names},
         )
 
     return {"status": "ok", "files": saved}
+
+
+@app.get("/api/cases/{case_id}/files/{filename}")
+async def view_uploaded_file(case_id: str, filename: str):
+    """Serve an uploaded document scan for viewing or downloading."""
+    import mimetypes
+    from fastapi.responses import FileResponse
+    from app.storage import get_uploaded_file_path
+
+    fpath = get_uploaded_file_path(case_id, filename)
+    if not fpath:
+        raise HTTPException(status_code=404, detail="Uploaded file not found")
+
+    media_type, _ = mimetypes.guess_type(str(fpath))
+    return FileResponse(path=str(fpath), media_type=media_type or "application/octet-stream", filename=fpath.name)
+
+
+@app.delete("/api/cases/{case_id}/files/{filename}")
+async def delete_uploaded_file_endpoint(case_id: str, filename: str):
+    """Delete a specific uploaded document scan from a case."""
+    from app.audit import log_audit_event
+    from app.storage import delete_uploaded_file, list_uploaded_files
+
+    removed = delete_uploaded_file(case_id, filename)
+    if not removed:
+        raise HTTPException(status_code=404, detail=f"File {filename} not found")
+
+    log_audit_event(
+        case_id=case_id,
+        event_type="file_deleted",
+        details={"filename": filename},
+    )
+    return {"status": "ok", "deleted": filename, "files": list_uploaded_files(case_id)}
 
 
 @app.delete("/api/cases/{case_id}")
