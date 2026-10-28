@@ -87,20 +87,17 @@ def build_case_report(
     save_report(report)
 
     # Append to audit trail
-    try:
-        audit_file = AUDIT_DIR / f"{pack.case_id}.jsonl"
-        entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "event": "checks_run",
+    from app.audit import log_audit_event
+    log_audit_event(
+        case_id=pack.case_id,
+        event_type="checks_run",
+        details={
             "mode": settings.mode,
             "overall": overall,
             "readiness_score": readiness_score,
             "pass_count": pass_count,
             "total_checks": len(all_results),
-        }
-        with open(audit_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
+        },
+    )
 
     return report

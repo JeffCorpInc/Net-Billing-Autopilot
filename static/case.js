@@ -238,17 +238,18 @@ const CasePage = {
         const dateStr = time.toLocaleDateString();
         const icon = iconMap[ev.event] || 'activity';
 
+        const d = ev.details || ev || {};
         let detailText = '';
         if (ev.event === 'checks_run') {
-          detailText = `Ran compliance checks (${ev.details.mode} mode) → Status: <strong>${ev.details.overall}</strong> (${ev.details.readiness_score}% readiness)`;
+          detailText = `Ran compliance checks (${d.mode || 'code'} mode) → Status: <strong>${d.overall || 'PENDING'}</strong> (${d.readiness_score ?? 0}% readiness)`;
         } else if (ev.event === 'checklist_generated') {
-          detailText = `Customer checklist compiled in <strong>${ev.details.lang.toUpperCase()}</strong> (${ev.details.gate} gate, source: ${ev.details.source})`;
+          detailText = `Customer checklist compiled in <strong>${(d.lang || 'en').toUpperCase()}</strong> (${d.gate || 'passed'} gate, source: ${d.source || 'template'})`;
         } else if (ev.event === 'draft_generated') {
-          detailText = `Draft PDF generated (${ev.details.disposition})`;
+          detailText = `Draft PDF generated (${d.disposition || 'inline'})`;
         } else if (ev.event === 'staff_review') {
-          detailText = `Staff review by <strong>${ev.details.staff_name}</strong>${ev.details.note ? `: "${ev.details.note}"` : ''}`;
+          detailText = `Staff review by <strong>${d.staff_name || 'Staff'}</strong>${d.note ? `: "${d.note}"` : ''}`;
         } else {
-          detailText = JSON.stringify(ev.details);
+          detailText = JSON.stringify(d);
         }
 
         return `

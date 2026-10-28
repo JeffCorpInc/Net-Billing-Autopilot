@@ -41,7 +41,20 @@ def get_case_audit_trail(case_id: str) -> list[dict[str, Any]]:
             for line in f:
                 line = line.strip()
                 if line:
-                    entries.append(json.loads(line))
+                    obj = json.loads(line)
+                    if "details" not in obj or not isinstance(obj.get("details"), dict):
+                        details = {
+                            k: v
+                            for k, v in obj.items()
+                            if k not in ("timestamp", "case_id", "event")
+                        }
+                        obj = {
+                            "timestamp": obj.get("timestamp", ""),
+                            "case_id": obj.get("case_id", case_id),
+                            "event": obj.get("event", "unknown"),
+                            "details": details,
+                        }
+                    entries.append(obj)
     except Exception:
         pass
     return entries

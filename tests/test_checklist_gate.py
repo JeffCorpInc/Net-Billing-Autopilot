@@ -84,3 +84,25 @@ def test_clean_case_skips_llm():
     assert res_ur.gate == "skipped"
     assert "تمام جانچ" in res_ur.items[0].text
 
+
+def test_audit_trail_checks_run_details_structure():
+    """Verify every audit entry (including checks_run) exposes details.mode."""
+    from starlette.testclient import TestClient
+    from app.main import app
+
+    client = TestClient(app)
+    r_check = client.post("/api/check/C01?use_llm=false")
+    assert r_check.status_code == 200
+
+    r_audit = client.get("/api/audit/C01")
+    assert r_audit.status_code == 200
+    entries = r_audit.json().get("entries", [])
+    assert len(entries) > 0
+    for entry in entries:
+        assert isinstance(entry.get("details"), dict)
+        if entry.get("event") == "checks_run":
+            assert "mode" in entry["details"]
+            assert "overall" in entry["details"]
+            assert "readiness_score" in entry["details"]
+
+
