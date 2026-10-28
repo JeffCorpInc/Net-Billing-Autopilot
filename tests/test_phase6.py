@@ -65,3 +65,4 @@ def test_accessibility_landmarks_and_skip_link():
     assert 'id="main-content"' in html
     assert 'href="#main-content"' in html
     assert "Skip to main content" in html
+
