@@ -133,6 +133,86 @@ const Modal = {
   }
 };
 
+// Bilingual UI Dictionary (English & Urdu)
+const I18N = {
+  en: {
+    'app.subtitle': 'Solar Onboarding Assistant',
+    'app.safety': '<strong>Safety Boundary:</strong> Synthetic data only · This tool is an internal assistant and never autonomously submits applications or pays fees.',
+    'nav.dashboard': 'Dashboard',
+    'nav.evaluate': 'Evaluation & Metrics',
+    'nav.about': 'About & Regulations',
+    'dash.page_title': 'Onboarding Queue',
+    'dash.hero_badge': 'K-Electric Net-Billing Onboarding Queue · 2026',
+    'dash.hero_title': 'Active Applications Queue',
+    'dash.hero_sub': 'Review rooftop-solar document packs, verify compliance with DISCO rules, redact CNIC numbers, and assemble compliant draft filings.',
+    'dash.run_all': 'Run All Checks (21)',
+    'dash.kpi_total': 'Total Cases',
+    'dash.packs': 'packs',
+    'dash.kpi_ready': 'Ready to File',
+    'dash.kpi_review': 'Needs Review',
+    'dash.kpi_notready': 'Not Ready',
+    'dash.dataset_summary': 'Dataset Summary:',
+    'dash.dataset_desc': '21 total packs (8 Clean benchmark cases, 13 Trap verification cases).',
+    'dash.common_issues': 'Common issues:',
+    'dash.issue_cap': 'Over Capacity',
+    'dash.issue_cnic': 'Expired CNIC',
+    'dash.issue_sld': 'Missing Single-Line',
+    'dash.search_placeholder': 'Search applicant, ID, keyword…',
+    'filter.all': 'All',
+    'filter.ready': 'Ready',
+    'filter.review': 'Needs Review',
+    'filter.not_ready': 'Not Ready',
+    'filter.pending': 'Pending',
+    'filter.clean': 'Clean Only',
+    'filter.trap': 'Traps Only',
+    'th.case_id': 'Case ID',
+    'th.applicant': 'Applicant & Description',
+    'th.type': 'Type',
+    'th.capacity': 'Capacity (Proposed / Limit)',
+    'th.docs': 'Documents',
+    'th.status': 'Overall Status',
+    'th.action': 'Action'
+  },
+  ur: {
+    'app.subtitle': 'سولر آن بورڈنگ اسسٹنٹ',
+    'app.safety': '<strong>حفاظتی حد:</strong> صرف مصنوعی ڈیٹا · یہ ٹول اندرونی معاون ہے اور کبھی خودکار طور پر درخواست جمع یا فیس ادا نہیں کرتا۔',
+    'nav.dashboard': 'ڈیش بورڈ',
+    'nav.evaluate': 'جائزہ اور معیار',
+    'nav.about': 'قواعد و ضوابط',
+    'dash.page_title': 'درخواستوں کی فہرست',
+    'dash.hero_badge': 'کے-الیکٹرک نیٹ بلنگ آن بورڈنگ قطار · 2026',
+    'dash.hero_title': 'فعال درخواستوں کی قطار',
+    'dash.hero_sub': 'روف ٹاپ سولر دستاویزات کی جانچ کریں، نیپرا اور کے-الیکٹرک قوانین کی تصدیق کریں، شناختی کارڈ نمبر محفوظ رکھیں اور ڈرافٹ تیار کریں۔',
+    'dash.run_all': 'تمام 21 کیسز چیک کریں',
+    'dash.kpi_total': 'کل کیسز',
+    'dash.packs': 'پیکس',
+    'dash.kpi_ready': 'جمع کرانے کے لیے تیار',
+    'dash.kpi_review': 'عملے کا جائزہ درکار',
+    'dash.kpi_notready': 'ناقص / مسائل',
+    'dash.dataset_summary': 'ڈیٹا سیٹ خلاصہ:',
+    'dash.dataset_desc': 'کل 21 پیکس (8 درست بینچ مارک کیسز، 13 ٹریپ کیسز)۔',
+    'dash.common_issues': 'عام مسائل:',
+    'dash.issue_cap': 'منظور شدہ لوڈ سے زائد',
+    'dash.issue_cnic': 'زائد المیعاد شناختی کارڈ',
+    'dash.issue_sld': 'سنگل لائن ڈایاگرام غائب',
+    'dash.search_placeholder': 'درخواست گزار، آئی ڈی یا لفظ تلاش کریں…',
+    'filter.all': 'سب',
+    'filter.ready': 'تیار',
+    'filter.review': 'جائزہ درکار',
+    'filter.not_ready': 'مسائل',
+    'filter.pending': 'زیر التواء',
+    'filter.clean': 'صرف درست',
+    'filter.trap': 'صرف ٹریپ',
+    'th.case_id': 'کیس آئی ڈی',
+    'th.applicant': 'درخواست گزار اور تفصیل',
+    'th.type': 'قسم',
+    'th.capacity': 'سسٹم کپیسٹی (مجوزہ / حد)',
+    'th.docs': 'دستاویزات',
+    'th.status': 'مجموعی حالت',
+    'th.action': 'عمل'
+  }
+};
+
 // Banner & Language Management
 const Prefs = {
   getLang() {
@@ -142,11 +222,45 @@ const Prefs = {
       return 'en';
     }
   },
-  setLang(lang) {
+  setLang(lang, notify = true) {
     try {
       localStorage.setItem('netbill_lang', lang);
     } catch {}
     this.updateLangUI(lang);
+    this.applyI18n(lang);
+
+    // Sync with CasePage checklist language if on case detail page
+    if (window.CasePage && window.CasePage.caseId && window.CasePage.checklistLang !== lang) {
+      window.CasePage.setChecklistLang(lang, false);
+    }
+
+    // Re-render dashboard table if on dashboard
+    if (typeof window.renderTable === 'function') {
+      window.renderTable();
+    }
+
+    if (notify && window.NetBill?.Toast) {
+      window.NetBill.Toast.show(
+        lang === 'ur' ? 'اردو فعال' : 'English Active',
+        lang === 'ur' ? 'انٹرفیس اور چیک لسٹ کی زبان اردو کر دی گئی ہے۔' : 'Interface and checklist language switched to English.',
+        'info'
+      );
+    }
+  },
+  applyI18n(lang) {
+    const dict = I18N[lang] || I18N.en;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key]) {
+        el.innerHTML = dict[key];
+      }
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (dict[key]) {
+        el.setAttribute('placeholder', dict[key]);
+      }
+    });
   },
   updateLangUI(lang) {
     const btnEn = document.getElementById('lang-btn-en');
@@ -247,7 +361,9 @@ document.addEventListener('DOMContentLoaded', () => {
   Toast.init();
   Modal.init();
   Prefs.initBanner();
-  Prefs.updateLangUI(Prefs.getLang());
+  const initialLang = Prefs.getLang();
+  Prefs.updateLangUI(initialLang);
+  Prefs.applyI18n(initialLang);
   initDrawer();
   updateLLMIndicator();
 

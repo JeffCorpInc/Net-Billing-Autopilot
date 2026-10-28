@@ -11,26 +11,27 @@ let isRunningAll = false;
 
 // Status styling helper following design tokens
 function getStatusBadge(status) {
+  const isUr = (window.NetBill?.Prefs?.getLang() || 'en') === 'ur';
   const map = {
     READY: {
       bg: 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
       icon: 'badge-check',
-      label: 'READY'
+      label: isUr ? 'تیار' : 'READY'
     },
     NOT_READY: {
       bg: 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800',
       icon: 'octagon-x',
-      label: 'ISSUES'
+      label: isUr ? 'مسائل' : 'ISSUES'
     },
     NEEDS_REVIEW: {
       bg: 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
       icon: 'alert-triangle',
-      label: 'REVIEW'
+      label: isUr ? 'جائزہ' : 'REVIEW'
     },
     PENDING: {
       bg: 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700',
       icon: 'clock',
-      label: 'PENDING'
+      label: isUr ? 'زیر التواء' : 'PENDING'
     }
   };
 
@@ -177,6 +178,8 @@ function renderTable() {
     return;
   }
 
+  const isUr = (window.NetBill?.Prefs?.getLang() || 'en') === 'ur';
+
   tableBody.innerHTML = items.map(c => `
     <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer group border-b border-slate-100 dark:border-slate-800/60" onclick="window.location='/case/${c.case_id}'">
       <!-- Case ID & Category -->
@@ -184,8 +187,8 @@ function renderTable() {
         <div class="flex items-center gap-2">
           <span>${c.case_id}</span>
           ${c.category === 'clean'
-            ? '<span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Clean</span>'
-            : '<span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">Trap</span>'
+            ? `<span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 whitespace-nowrap">${isUr ? 'درست' : 'Clean'}</span>`
+            : `<span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800 whitespace-nowrap">${isUr ? 'ٹریپ' : 'Trap'}</span>`
           }
         </div>
       </td>
@@ -204,7 +207,7 @@ function renderTable() {
       <td class="py-3.5 px-4">
         <div class="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
           <i data-lucide="${c.category === 'clean' && c.sanctioned_load_kw > 20 ? 'building' : 'home'}" class="w-4 h-4 text-slate-400"></i>
-          <span class="capitalize">${c.sanctioned_load_kw >= 15 ? 'Commercial' : 'Residential'}</span>
+          <span class="capitalize">${c.sanctioned_load_kw >= 15 ? (isUr ? 'کمرشل' : 'Commercial') : (isUr ? 'رہائشی' : 'Residential')}</span>
         </div>
       </td>
 
@@ -227,13 +230,13 @@ function renderTable() {
       <td class="py-3.5 px-4 text-right">
         <div class="inline-flex items-center gap-2">
           ${c.reviewed ? `
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800" title="Reviewed by staff">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 whitespace-nowrap" title="Reviewed by staff">
               <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
-              <span>Reviewed</span>
+              <span>${isUr ? 'تصدیق شدہ' : 'Reviewed'}</span>
             </span>
           ` : ''}
-          <a href="/case/${c.case_id}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-amber-500 hover:text-slate-950 dark:bg-slate-800 dark:hover:bg-amber-500 dark:hover:text-slate-950 text-slate-700 dark:text-slate-300 transition-colors inline-flex items-center gap-1">
-            <span>Open</span>
+          <a href="/case/${c.case_id}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-amber-500 hover:text-slate-950 dark:bg-slate-800 dark:hover:bg-amber-500 dark:hover:text-slate-950 text-slate-700 dark:text-slate-300 transition-colors inline-flex items-center gap-1 whitespace-nowrap">
+            <span>${isUr ? 'کھولیں' : 'Open'}</span>
             <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
           </a>
         </div>
@@ -243,6 +246,7 @@ function renderTable() {
 
   if (window.lucide) window.lucide.createIcons({ root: tableBody });
 }
+window.renderTable = renderTable;
 
 // Client-side batch check loop over all cases (used in Phase 2)
 async function runAllChecks() {

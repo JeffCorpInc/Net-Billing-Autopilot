@@ -78,7 +78,7 @@
           </div>
           <div>
             <div class="font-bold text-lg text-white leading-tight tracking-tight">NetBill Assist</div>
-            <div class="text-[11px] text-slate-400 font-medium">Solar Onboarding Assistant</div>
+            <div data-i18n="app.subtitle" class="text-[11px] text-slate-400 font-medium">Solar Onboarding Assistant</div>
           </div>
         </a>
         <button id="drawer-close-btn" class="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg">
@@ -90,15 +90,15 @@
       <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         <a href="/" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors {% if active_page == 'dashboard' %}bg-amber-500 text-slate-950 font-semibold shadow{% else %}text-slate-300 hover:bg-slate-800/70 hover:text-white{% endif %}">
           <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-          <span>Dashboard</span>
+          <span data-i18n="nav.dashboard">Dashboard</span>
         </a>
         <a href="/evaluate" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors {% if active_page == 'evaluate' %}bg-amber-500 text-slate-950 font-semibold shadow{% else %}text-slate-300 hover:bg-slate-800/70 hover:text-white{% endif %}">
           <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-          <span>Evaluation & Metrics</span>
+          <span data-i18n="nav.evaluate">Evaluation & Metrics</span>
         </a>
         <a href="/about" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors {% if active_page == 'about' %}bg-amber-500 text-slate-950 font-semibold shadow{% else %}text-slate-300 hover:bg-slate-800/70 hover:text-white{% endif %}">
           <i data-lucide="info" class="w-4 h-4"></i>
-          <span>About & Regulations</span>
+          <span data-i18n="nav.about">About & Regulations</span>
         </a>
       </nav>
 
@@ -162,7 +162,7 @@
       <div id="safety-banner" class="bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200/80 dark:border-amber-900/60 px-4 sm:px-6 py-2 flex items-center justify-between text-xs text-amber-900 dark:text-amber-200">
         <div class="flex items-center gap-2">
           <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0"></i>
-          <span><strong>Safety Boundary:</strong> Synthetic data only · This tool is an internal assistant and never autonomously submits applications or pays fees.</span>
+          <span data-i18n="app.safety"><strong>Safety Boundary:</strong> Synthetic data only · This tool is an internal assistant and never autonomously submits applications or pays fees.</span>
         </div>
         <button id="dismiss-safety-banner" type="button" class="text-amber-700 dark:text-amber-300 hover:opacity-75 p-1">
           <i data-lucide="x" class="w-3.5 h-3.5"></i>

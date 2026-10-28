@@ -14,10 +14,11 @@ const CasePage = {
 
   init(caseId) {
     this.caseId = caseId;
+    this.checklistLang = window.NetBill?.Prefs?.getLang() || 'en';
     this.bindEvents();
     this.initCrossDocHover();
     this.updateGauge();
-    this.loadChecklist();
+    this.setChecklistLang(this.checklistLang, false);
   },
 
   bindEvents() {
@@ -104,7 +105,7 @@ const CasePage = {
     }
   },
 
-  setChecklistLang(lang) {
+  setChecklistLang(lang, syncGlobal = true) {
     this.checklistLang = lang;
     const btnEn = document.getElementById('case-lang-en');
     const btnUr = document.getElementById('case-lang-ur');
@@ -116,6 +117,9 @@ const CasePage = {
         btnEn.className = 'px-2.5 py-1 rounded-lg transition-colors bg-amber-500 text-slate-950 font-bold';
         btnUr.className = 'px-2.5 py-1 rounded-lg transition-colors text-slate-600 dark:text-slate-400';
       }
+    }
+    if (syncGlobal && window.NetBill?.Prefs) {
+      window.NetBill.Prefs.setLang(lang, false);
     }
     this.loadChecklist();
   },
