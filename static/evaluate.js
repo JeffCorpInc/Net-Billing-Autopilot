@@ -569,7 +569,7 @@
 
       return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
         <td class="py-2.5 px-3 font-bold text-slate-900 dark:text-white">
-          <a href="/cases/${c.case_id}" class="hover:text-amber-500 hover:underline flex items-center gap-1.5 font-mono">
+          <a href="/case/${c.case_id}" class="hover:text-amber-500 hover:underline flex items-center gap-1.5 font-mono">
             <span>${c.case_id}</span>
           </a>
         </td>
@@ -584,7 +584,7 @@
         <td class="py-2.5 px-2 text-center">${gateBadge}</td>
         <td class="py-2.5 px-2 text-center">${pdfBadge}</td>
         <td class="py-2.5 px-3 text-right">
-          <a href="/cases/${c.case_id}" class="text-amber-600 dark:text-amber-400 hover:underline font-sans font-semibold text-[11px] whitespace-nowrap">
+          <a href="/case/${c.case_id}" class="text-amber-600 dark:text-amber-400 hover:underline font-sans font-semibold text-[11px] whitespace-nowrap">
             Inspect &rarr;
           </a>
         </td>

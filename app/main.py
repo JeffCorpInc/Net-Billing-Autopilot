@@ -97,6 +97,7 @@ async def dashboard_page(request: Request):
 
 
 @app.get("/case/{case_id}", response_class=HTMLResponse)
+@app.get("/cases/{case_id}", response_class=HTMLResponse)
 async def case_page(request: Request, case_id: str):
     """Render individual application case page."""
     from app.storage import get_latest_report, get_pack, load_reviews
