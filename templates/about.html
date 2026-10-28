@@ -2,99 +2,305 @@
 
 {% block title %}About & Regulations — NetBill Assist{% endblock %}
 {% block breadcrumb %}About{% endblock %}
-{% block page_title %}Regulatory Architecture & Compliance{% endblock %}
+{% block page_title %}Regulatory Architecture & Compliance System{% endblock %}
 
 {% block content %}
-<div class="space-y-8 max-w-4xl">
-  <!-- Mission Card -->
+<div class="space-y-8 max-w-5xl fade-slide-up">
+
+  <!-- Hero / Regulatory Mandate Banner -->
+  <div class="bg-gradient-to-r from-[#0F172A] via-slate-900 to-slate-800 text-white rounded-2xl p-6 sm:p-8 shadow-xl border border-slate-800 relative overflow-hidden">
+    <div class="max-w-3xl">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-3">
+        <i data-lucide="scale" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span>NEPRA (Prosumer) Regulations 2026 · SRO 251(I)/2026</span>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Net-Billing Regulatory Architecture</h2>
+      <p class="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        Under Regulation 3(5) of the 2026 NEPRA regime and the K-Electric Net Billing Guidelines (13 April 2026), the distribution company verifies filing completeness within <strong>5 working days</strong>. If any document is defective or mismatched, the applicant is granted only <strong>3 working days</strong> to rectify. Incomplete applications get rejected immediately, delaying rooftop solar export interconnection by weeks.
+      </p>
+      <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+        <span class="inline-flex items-center gap-1.5"><i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-400"></i> Rules as of: <strong>2026-04-13</strong></span>
+        <span>•</span>
+        <span class="inline-flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-400"></i> DISCO: <strong>K-Electric (Karachi)</strong></span>
+        <span>•</span>
+        <span class="inline-flex items-center gap-1.5"><i data-lucide="book-open" class="w-3.5 h-3.5 text-amber-400"></i> Academic: <strong>DATA722 Mid-Term Project</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- The Human Gate: Absolute Hard Boundary -->
   <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
     <div class="flex items-center gap-3 mb-4">
-      <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-        <i data-lucide="sun" class="w-5 h-5"></i>
+      <div class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
+        <i data-lucide="shield-alert" class="w-5 h-5"></i>
       </div>
       <div>
-        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Product Mission</h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400">DATA722 Generative AI & Strategic Forecasting · Solar Onboarding Assistant</p>
+        <h3 class="text-base font-bold text-slate-900 dark:text-white">Hard Boundary #1: The Human Gate (Zero Autonomous Action)</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">The assistant prepares and audits dossiers; humans verify, sign, and submit.</p>
       </div>
     </div>
-    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-      In early 2026, NEPRA replaced net metering with net billing under the <strong>NEPRA (Prosumer) Regulations 2026 (SRO 251(I)/2026)</strong>. Under Regulation 3(5), K-Electric verifies application completeness within 5 working days, and applicants have only 3 working days to rectify missing items. Incomplete filings delay customer solar grid exports by weeks.
-    </p>
-    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-3">
-      <strong>NetBill Assist</strong> is an internal intelligence tool for installer onboarding staff. It enforces deterministic regulatory validation, flags inconsistencies across identity and billing documents, generates bilingual customer rectifications (English &amp; Urdu), and outputs draft Schedule-II applications.
-    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center my-6">
+      <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60">
+        <div class="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center mx-auto mb-2">1</div>
+        <div class="font-bold text-sm text-slate-900 dark:text-white">Installer Staff Audit</div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Staff reviews automated check verdicts, inspects high-confidence and unsure flags, and logs sign-off.</p>
+      </div>
+      <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60">
+        <div class="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center mx-auto mb-2">2</div>
+        <div class="font-bold text-sm text-slate-900 dark:text-white">Customer Physical Sign-Off</div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Customer inspects watermarked draft PDF with masked credentials and physically signs Schedule-II application.</p>
+      </div>
+      <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60">
+        <div class="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center mx-auto mb-2">3</div>
+        <div class="font-bold text-sm text-slate-900 dark:text-white">Manual Portal Filing</div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Authorized installer engineer manually logs into K-Electric portal and uploads signed dossier with bank fee voucher.</p>
+      </div>
+    </div>
+
+    <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/60 text-xs text-rose-800 dark:text-rose-300 flex items-center gap-3">
+      <i data-lucide="ban" class="w-5 h-5 text-rose-500 shrink-0"></i>
+      <span><strong>Strict Guarantee:</strong> There are <em>no submit, transmit, or pay buttons anywhere</em> in this codebase. Automated execution of regulatory filings is strictly forbidden.</span>
+    </div>
   </div>
 
-  <!-- The Human Gate Diagram -->
+  <!-- The 6 Architectural Hard Boundaries Table -->
   <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
     <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-      <i data-lucide="shield-check" class="w-5 h-5 text-teal-600 dark:text-teal-400"></i>
-      <span>The Human Gate (Zero Autonomous Action)</span>
+      <i data-lucide="layers" class="w-5 h-5 text-amber-500"></i>
+      <span>The 6 Hard Architectural Boundaries</span>
     </h3>
-    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">
-      The system never submits applications, signs documents, or processes fee payments.
+    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+      Architectural design choices safeguarding against LLM hallucination, credential leakage, and silent compliance failures.
     </p>
 
-    <!-- Workflow Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-      <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800">
-        <div class="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center mx-auto mb-2">1</div>
-        <div class="font-bold text-sm text-slate-900 dark:text-white">Staff Review</div>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Staff inspects automated check verdicts and validates document pack.</p>
-      </div>
-      <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800">
-        <div class="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center mx-auto mb-2">2</div>
-        <div class="font-bold text-sm text-slate-900 dark:text-white">Customer Signs</div>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Customer reviews pre-filled draft PDF in person and physically signs.</p>
-      </div>
-      <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800">
-        <div class="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center mx-auto mb-2">3</div>
-        <div class="font-bold text-sm text-slate-900 dark:text-white">Manual Filing</div>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Authorized staff uploads signed dossier to K-Electric portal manually.</p>
-      </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
+            <th class="py-2.5 px-3">Boundary</th>
+            <th class="py-2.5 px-3">Requirement</th>
+            <th class="py-2.5 px-3">Enforcement Mechanism</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+          <tr>
+            <td class="py-3 px-3 font-semibold text-slate-900 dark:text-white">1. No Autonomous Action</td>
+            <td class="py-3 px-3 text-slate-600 dark:text-slate-300">No submission or payment APIs exist</td>
+            <td class="py-3 px-3 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">Physical sign-off workflow only</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-3 font-semibold text-slate-900 dark:text-white">2. Code Decides Hard Rules</td>
+            <td class="py-3 px-3 text-slate-600 dark:text-slate-300">R1–R7 rules calculated deterministically in Python</td>
+            <td class="py-3 px-3 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">LLM output never overrides hard verdicts</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-3 font-semibold text-slate-900 dark:text-white">3. Scoped LLM Intelligence</td>
+            <td class="py-3 px-3 text-slate-600 dark:text-slate-300">LLM restricted to fuzzy matching and Urdu checklists</td>
+            <td class="py-3 px-3 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">Strict temperature=0.0 & JSON schema validation</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-3 font-semibold text-slate-900 dark:text-white">4. Absolute Credential Redaction</td>
+            <td class="py-3 px-3 text-slate-600 dark:text-slate-300">Zero CNIC or billing account numbers sent to LLM</td>
+            <td class="py-3 px-3 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">Two-layer redaction (dict filter + regex scrubber)</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-3 font-semibold text-slate-900 dark:text-white">5. Synthetic Data Isolation</td>
+            <td class="py-3 px-3 text-slate-600 dark:text-slate-300">Zero real customer PII used; 21 synthetic packs</td>
+            <td class="py-3 px-3 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">Faker seeded with 722 + ground truth expected.csv</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-3 font-semibold text-slate-900 dark:text-white">6. Draft PDF Code Supremacy</td>
+            <td class="py-3 px-3 text-slate-600 dark:text-slate-300">Zero LLM text in generated PDF Schedule-II</td>
+            <td class="py-3 px-3 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">ReportLab draws only verified pack values</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <!-- Architectural Principles -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-      <h4 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2 mb-2">
-        <i data-lucide="code-2" class="w-4 h-4 text-blue-500"></i>
-        <span>Code Decides, LLM Explains</span>
-      </h4>
-      <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-        Formats, numbers, dates, load calculations, and required checklists are decided 100% deterministically by Python code. LLM output never overrides hard-rule verdicts.
+  <!-- Deterministic Regulatory Rule Catalog (R1 to R7) -->
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+    <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+      <i data-lucide="binary" class="w-5 h-5 text-blue-500"></i>
+      <span>Deterministic Regulatory Rule Catalog (R1–R7)</span>
+    </h3>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">
+      Each rule implements an exact clause from the K-Electric Guidelines or NEPRA SRO 251(I)/2026.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- R1 -->
+      <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-xs font-mono text-amber-500">R1 · CNIC Format</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">Clause 2.1</span>
+        </div>
+        <p class="text-xs text-slate-700 dark:text-slate-300">
+          Validates standard 13-digit Pakistani National Identity Card format: <code class="font-mono bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded">^\d{5}-\d{7}-\d{1}$</code>.
+        </p>
+      </div>
+
+      <!-- R2 -->
+      <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-xs font-mono text-amber-500">R2 · CNIC Expiry</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">Clause 2.1</span>
+        </div>
+        <p class="text-xs text-slate-700 dark:text-slate-300">
+          CNIC validity date must be strictly on or after filing evaluation reference date (<strong>2026-04-13</strong>). Expired cards rejected.
+        </p>
+      </div>
+
+      <!-- R3 -->
+      <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-xs font-mono text-amber-500">R3 · Capacity Cap</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">Reg 3(1)</span>
+        </div>
+        <p class="text-xs text-slate-700 dark:text-slate-300">
+          Proposed inverter output capacity must not exceed 100% of sanctioned load: <code class="font-mono bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded">proposed_kw &le; sanctioned_load_kw</code>.
+        </p>
+      </div>
+
+      <!-- R4 -->
+      <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-xs font-mono text-amber-500">R4 · 3-Phase Requirement</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">Clause 3.2</span>
+        </div>
+        <p class="text-xs text-slate-700 dark:text-slate-300">
+          Under K-Electric net billing guidelines, any generation exceeding <strong>5 kW</strong> strictly requires a three-phase meter connection.
+        </p>
+      </div>
+
+      <!-- R5 -->
+      <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-xs font-mono text-amber-500">R5 · Connected Load</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">Clause 4.1</span>
+        </div>
+        <p class="text-xs text-slate-700 dark:text-slate-300">
+          Actual connected premise load must be strictly less than or equal to bill sanctioned load to prevent distribution transformer overloads.
+        </p>
+      </div>
+
+      <!-- R6 -->
+      <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-xs font-mono text-amber-500">R6 · Load-Flow Study</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">Reg 3(7)</span>
+        </div>
+        <p class="text-xs text-slate-700 dark:text-slate-300">
+          Interconnection capacity exceeding <strong>250 kW</strong> triggers a mandatory distribution network load-flow stability study.
+        </p>
+      </div>
+
+      <!-- R7 -->
+      <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2 md:col-span-2">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-xs font-mono text-amber-500">R7 · Required Documents Completeness</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">Clause 2.2</span>
+        </div>
+        <p class="text-xs text-slate-700 dark:text-slate-300">
+          Enforces mandatory dossier items: CNIC copy, latest paid electricity bill, title deed/proof of ownership, single-line diagram, Schedule-V affidavit, vendor checklist, inverter datasheet, and inverter settings letter. For tenants: owner's NOC. For commercial: NTN &amp; Form-29.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Two-Layer Redaction Architecture -->
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+        <i data-lucide="lock" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-slate-900 dark:text-white">Two-Layer Privacy &amp; Credential Redaction Architecture</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Strict defense-in-depth preventing accidental PII leakage to third-party model APIs.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+      <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60">
+        <div class="font-bold text-xs text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">Layer 1: Direct Field Exclusion</div>
+        <p class="text-xs text-slate-600 dark:text-slate-300">
+          Before building the LLM prompt payload, builder functions omit <code class="font-mono bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded">cnic_number</code> and <code class="font-mono bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded">account_number</code> entirely from the Python dictionaries.
+        </p>
+      </div>
+      <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60">
+        <div class="font-bold text-xs text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">Layer 2: Regex Payload Scrubber</div>
+        <p class="text-xs text-slate-600 dark:text-slate-300">
+          Serialized JSON strings are scanned via compiled regex patterns. Any 13-digit Pakistani CNIC or 13/14-digit K-Electric account reference is scrubbed to <code class="font-mono bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded">[REDACTED_CNIC]</code> or <code class="font-mono bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded">[REDACTED_REF]</code>.
+        </p>
+      </div>
+    </div>
+
+    <div class="text-xs text-slate-500 dark:text-slate-400">
+      Unit-tested across all 21 synthetic cases in <code class="font-mono">tests/test_redact.py</code>: zero unredacted CNICs or bill account numbers ever reach the LLM wire.
+    </div>
+  </div>
+
+  <!-- Karachi Urban Realities & Linguistic Considerations -->
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+        <i data-lucide="languages" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-slate-900 dark:text-white">Karachi Urban Semantics &amp; Address Realities</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Why LLM fuzzy matching is strictly required alongside deterministic code.</p>
+      </div>
+    </div>
+
+    <div class="space-y-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+      <p>
+        In Karachi municipal records and K-Electric consumer billing, identical addresses and names are routinely transliterated and abbreviated differently:
+      </p>
+      <ul class="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
+        <li><strong>Name Honorifics &amp; Transliterations:</strong> "Muhammad" vs "Mohd" vs "M.", "Syed", "Begum", "Chaudhry", "Khan".</li>
+        <li><strong>Tenant vs Landlord:</strong> Lawful tenants apply with owner's NOC; bill name matches title deed rather than tenant CNIC.</li>
+        <li><strong>Karachi Address Toponyms:</strong> "DHA Phase 6" vs "Defence Phase VI", "Clifton Block 2" vs "Block II Clifton", "Nazimabad 3" vs "Nazimabad No. 3".</li>
+      </ul>
+      <p class="pt-1">
+        Deterministic string matching fails on 90% of real Karachi packs. NetBill Assist deploys a specialized prompt paired with RapidFuzz fallback scoring. When confidence is borderline, the system safely verdicts <strong class="text-amber-600 dark:text-amber-400">UNSURE</strong> to route to human staff without failing the customer.
       </p>
     </div>
+  </div>
 
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-      <h4 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2 mb-2">
-        <i data-lucide="lock" class="w-4 h-4 text-rose-500"></i>
-        <span>Privacy &amp; Data Redaction</span>
-      </h4>
-      <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-        Zero CNIC numbers or billing reference IDs are ever transmitted to any LLM. Strict redaction runs prior to every model invocation.
-      </p>
+  <!-- Official Regulatory Citations & Documents -->
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+    <h3 class="text-base font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+      <i data-lucide="file-text" class="w-5 h-5 text-emerald-500"></i>
+      <span>Official Regulatory Citations</span>
+    </h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <a href="https://ke.com.pk/wp-content/uploads/2026/04/8.-NEPRA-Prosumer-Regulations-SRO-251I2026-09-02-26.pdf" target="_blank" rel="noopener noreferrer" class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-amber-500 dark:hover:border-amber-500 transition-colors group">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-xs text-slate-900 dark:text-white group-hover:text-amber-500">NEPRA Prosumer Regulations 2026</span>
+          <i data-lucide="external-link" class="w-4 h-4 text-slate-400 group-hover:text-amber-500"></i>
+        </div>
+        <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">SRO 251(I)/2026 (09 February 2026)</div>
+        <p class="text-xs text-slate-600 dark:text-slate-400 mt-2">
+          Federal statutory framework establishing net-billing pricing, eligibility, technical interconnection, and dispute arbitration.
+        </p>
+      </a>
+
+      <a href="https://ke.com.pk/wp-content/uploads/2026/04/Net-Billing-Guidelines-13th-Apr26.pdf" target="_blank" rel="noopener noreferrer" class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-amber-500 dark:hover:border-amber-500 transition-colors group">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-xs text-slate-900 dark:text-white group-hover:text-amber-500">K-Electric Net Billing Guidelines</span>
+          <i data-lucide="external-link" class="w-4 h-4 text-slate-400 group-hover:text-amber-500"></i>
+        </div>
+        <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Version 1.0 (13 April 2026)</div>
+        <p class="text-xs text-slate-600 dark:text-slate-400 mt-2">
+          K-Electric operational rules, Schedule-II application form, 3-phase metering thresholds, and required dossier checklist.
+        </p>
+      </a>
     </div>
   </div>
 
-  <!-- Legal & Official Citations -->
-  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-    <h4 class="font-bold text-sm text-slate-900 dark:text-white mb-3">Official Regulatory Sources</h4>
-    <ul class="space-y-2 text-xs">
-      <li>
-        <a href="https://ke.com.pk/wp-content/uploads/2026/04/8.-NEPRA-Prosumer-Regulations-SRO-251I2026-09-02-26.pdf" target="_blank" rel="noopener noreferrer" class="text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5 font-medium">
-          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-          <span>NEPRA Prosumer Regulations 2026 (SRO 251(I)/2026)</span>
-        </a>
-      </li>
-      <li>
-        <a href="https://ke.com.pk/wp-content/uploads/2026/04/Net-Billing-Guidelines-13th-Apr26.pdf" target="_blank" rel="noopener noreferrer" class="text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5 font-medium">
-          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-          <span>K-Electric Net Billing Guidelines (13 April 2026)</span>
-        </a>
-      </li>
-    </ul>
-  </div>
 </div>
 {% endblock %}

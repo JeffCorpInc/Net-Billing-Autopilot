@@ -59,6 +59,11 @@
 </head>
 <body class="h-full bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
 
+  <!-- Accessibility: Skip to Main Content Link -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-amber-500 focus:text-slate-950 focus:font-bold focus:rounded-xl focus:shadow-lg focus:outline-none">
+    Skip to main content
+  </a>
+
   <!-- Mobile Sidebar Backdrop -->
   <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/60 z-40 lg:hidden hidden"></div>
 
@@ -165,7 +170,7 @@
       </div>
 
       <!-- Main Page Content Block -->
-      <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+      <main id="main-content" class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto" tabindex="-1">
         {% block content %}{% endblock %}
       </main>
 
