@@ -509,51 +509,57 @@
     tbody.innerHTML = cases.map(c => {
       const isClean = c.category === 'clean';
       const catBadge = isClean
-        ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Clean</span>`
-        : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800">Trap</span>`;
+        ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Clean</span>`
+        : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800">Trap</span>`;
 
       const checkCells = checkOrder.map(k => {
         const item = c.checks?.[k] || {};
         const got = item.got || '-';
         const isMatch = item.match;
 
-        let colorCls = 'text-slate-400';
         let bgCls = 'bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300';
 
         if (got === 'PASS') {
-          bgCls = 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/40';
+          bgCls = 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-800/40';
         } else if (got === 'FAIL') {
-          bgCls = 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200/50 dark:border-rose-800/40';
+          bgCls = 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200/70 dark:border-rose-800/40';
         } else if (got === 'UNSURE') {
-          bgCls = 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40';
+          bgCls = 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/70 dark:border-amber-800/40';
         }
 
         const borderRing = !isMatch ? 'ring-2 ring-rose-500' : '';
 
         return `<td class="py-2.5 px-2 text-center">
-          <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${bgCls} ${borderRing}" title="Exp: ${item.expected} | Got: ${got}">
+          <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap ${bgCls} ${borderRing}" title="Exp: ${item.expected} | Got: ${got}">
             ${got}
           </span>
         </td>`;
       }).join('');
 
-      // Overall Got vs Exp
-      const overallMatch = c.overall_match;
+      // Overall Got vs Exp (Dashboard-style rounded pill + compact label)
       const overallGot = c.overall_got || '-';
       let overallCls = 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
+      let overallLabel = overallGot;
+      let overallIcon = 'help-circle';
       if (overallGot === 'READY') {
-        overallCls = 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700';
+        overallCls = 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800';
+        overallLabel = 'READY';
+        overallIcon = 'check-circle';
       } else if (overallGot === 'NOT_READY') {
-        overallCls = 'bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-700';
+        overallCls = 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800';
+        overallLabel = 'ISSUES';
+        overallIcon = 'x-circle';
       } else if (overallGot === 'NEEDS_REVIEW') {
-        overallCls = 'bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700';
+        overallCls = 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800';
+        overallLabel = 'REVIEW';
+        overallIcon = 'alert-triangle';
       }
 
       // Gate status
       const gatePass = c.gate_passed;
       const gateBadge = gatePass
-        ? `<span class="text-emerald-600 dark:text-emerald-400 font-bold">PASS</span>`
-        : `<span class="text-rose-600 dark:text-rose-400 font-bold">FAIL</span>`;
+        ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-800/40">PASS</span>`
+        : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200/70 dark:border-rose-800/40">FAIL</span>`;
 
       // PDF Discrepancies
       const pdfCount = c.wrong_pdf_values ?? 0;
@@ -570,14 +576,15 @@
         <td class="py-2.5 px-3">${catBadge}</td>
         ${checkCells}
         <td class="py-2.5 px-3 text-center">
-          <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold ${overallCls}" title="Expected: ${c.overall_expected}">
-            ${overallGot}
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${overallCls}" title="Expected: ${c.overall_expected} | Got: ${overallGot}">
+            <i data-lucide="${overallIcon}" class="w-3 h-3 shrink-0"></i>
+            ${overallLabel}
           </span>
         </td>
         <td class="py-2.5 px-2 text-center">${gateBadge}</td>
         <td class="py-2.5 px-2 text-center">${pdfBadge}</td>
         <td class="py-2.5 px-3 text-right">
-          <a href="/cases/${c.case_id}" class="text-amber-600 dark:text-amber-400 hover:underline font-sans font-semibold text-[11px]">
+          <a href="/cases/${c.case_id}" class="text-amber-600 dark:text-amber-400 hover:underline font-sans font-semibold text-[11px] whitespace-nowrap">
             Inspect &rarr;
           </a>
         </td>
