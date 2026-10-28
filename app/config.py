@@ -14,6 +14,7 @@ RUNTIME_DIR = DATA_DIR / "runtime"
 REPORTS_DIR = RUNTIME_DIR / "reports"
 AUDIT_DIR = RUNTIME_DIR / "audit"
 EVAL_DIR = RUNTIME_DIR / "eval"
+EXPECTED_CSV = DATA_DIR / "expected.csv"
 LLM_LOG_PATH = RUNTIME_DIR / "llm_log.jsonl"
 REVIEWS_PATH = RUNTIME_DIR / "reviews.json"
 

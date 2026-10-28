@@ -83,3 +83,4 @@ def test_clean_case_skips_llm():
     res_ur = generate_customer_checklist("C01", report, lang="ur")
     assert res_ur.gate == "skipped"
     assert "تمام جانچ" in res_ur.items[0].text
+

@@ -330,3 +330,4 @@ def generate_draft_pdf_bytes(pack: Pack, report: CaseReport | None = None) -> by
 
     doc.build(story, canvasmaker=NumberedCanvasWithWatermark)
     return buf.getvalue()
+

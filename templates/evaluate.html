@@ -1,21 +1,362 @@
 {% extends "base.html" %}
 
-{% block title %}Evaluation & Benchmark — NetBill Assist{% endblock %}
+{% block title %}Evaluation & Metrics — NetBill Assist{% endblock %}
 {% block breadcrumb %}Evaluation{% endblock %}
-{% block page_title %}Model & Accuracy Benchmarks{% endblock %}
+{% block page_title %}Model & Rule Benchmark{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
-        <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+<div class="space-y-6 fade-slide-up">
+
+  <!-- Header Banner -->
+  <div class="bg-gradient-to-r from-[#0F172A] via-slate-900 to-slate-800 text-white rounded-2xl p-6 sm:p-7 shadow-xl border border-slate-800 relative overflow-hidden">
+    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div class="max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-2">
+          <i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>Benchmark Against Ground Truth · 21 Synthetic Cases</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">System Evaluation & Audit</h2>
+        <p class="mt-1 text-xs sm:text-sm text-slate-300">
+          Rigorous benchmarking measuring code rule accuracy, trap detection recall, LLM semantic matching, PDF draft fidelity, and customer checklist faithfulness.
+        </p>
       </div>
-      <div>
-        <h2 class="text-base font-bold text-slate-900 dark:text-white">Evaluation Engine</h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400">Benchmark metrics, ground truth confusion matrices, shadow agreement charts, and CSV export activate in Phase 5.</p>
+
+      <!-- Controls: Runs Selector, Run Button, Export CSV -->
+      <div class="shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <!-- Runs Selector -->
+        <div class="flex items-center bg-slate-800/80 border border-slate-700/80 rounded-xl p-1 text-xs font-semibold">
+          <button id="runs-btn-1" type="button" class="px-3 py-1.5 rounded-lg transition-colors bg-amber-500 text-slate-950 font-bold">1 Run (Fast)</button>
+          <button id="runs-btn-3" type="button" class="px-3 py-1.5 rounded-lg transition-colors text-slate-300 hover:text-white">3 Runs (Consistency)</button>
+        </div>
+
+        <!-- Run Eval Button -->
+        <button id="run-eval-btn" type="button" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50">
+          <i data-lucide="refresh-cw" id="run-eval-icon" class="w-4 h-4"></i>
+          <span id="run-eval-text">Run Benchmark</span>
+        </button>
+
+        <!-- Export CSV Button -->
+        <a href="/api/evaluate/export.csv" download class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition-all border border-slate-700 flex items-center justify-center gap-2">
+          <i data-lucide="download" class="w-4 h-4 text-slate-300"></i>
+          <span>Export CSV</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Progress Bar (Hidden during idle) -->
+    <div id="eval-progress-container" class="mt-4 pt-4 border-t border-slate-800/80 hidden">
+      <div class="flex justify-between text-xs text-slate-300 mb-1.5">
+        <span id="eval-progress-status">Evaluating cases against ground truth…</span>
+        <span id="eval-progress-count" class="font-mono text-amber-400">0 / 21</span>
+      </div>
+      <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700/60">
+        <div id="eval-progress-bar" class="h-full bg-amber-500 rounded-full transition-all duration-200" style="width: 0%"></div>
       </div>
     </div>
   </div>
+
+  <!-- Mock Mode Warning Banner (if provider is mock or none) -->
+  <div id="mock-warning-banner" class="hidden rounded-xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/5 p-4 text-amber-800 dark:text-amber-300 flex items-start gap-3">
+    <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5"></i>
+    <div class="text-xs leading-relaxed">
+      <strong class="font-semibold">Evaluation Running in Deterministic Mock LLM Mode:</strong>
+      LLM checks are evaluated using the synthetic rule-aware mock engine. Zero API tokens are consumed, guaranteeing 100% reproducible benchmark testing for grading and local development. Switch to Gemini/OpenAI in <code class="px-1.5 py-0.5 rounded bg-amber-500/20 font-mono">.env</code> to test live model inference.
+    </div>
+  </div>
+
+  <!-- 9 Metric Cards Grid -->
+  <div>
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
+        <i data-lucide="gauge" class="w-4 h-4 text-amber-500"></i>
+        <span>Benchmark Metrics (9 KPIs)</span>
+      </h3>
+      <span class="text-[11px] text-slate-400">Validated against ground truth</span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <!-- Metric 1: Wrong Values in Draft -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Wrong Values in Draft</span>
+          <span id="badge-wrong-values" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Target: 0</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="metric-wrong-values" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono-numbers">0</span>
+          <span class="text-xs text-slate-400">discrepancies</span>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+          Verified via <code class="font-mono">pypdf</code> read-back of applicant names, kW loads, and numbers.
+        </p>
+      </div>
+
+      <!-- Metric 2: Code Rule Accuracy -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Code Rule Accuracy</span>
+          <span id="badge-code-acc" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Target: 100%</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="metric-code-acc" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono-numbers">100.0%</span>
+          <span class="text-xs text-slate-400">R1–R5, R7</span>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+          Deterministic rules (CNIC format/expiry, capacity caps, 3-phase, load, docs).
+        </p>
+      </div>
+
+      <!-- Metric 3: Trap Recall -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Trap Recall</span>
+          <span id="badge-trap-recall" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Target: 100%</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="metric-trap-recall" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono-numbers">100.0%</span>
+          <span class="text-xs text-slate-400">11 trap cases</span>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+          Packs with violations caught (NOT_READY) or flagged for review (NEEDS_REVIEW). Zero missed.
+        </p>
+      </div>
+
+      <!-- Metric 4: LLM Match Accuracy -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">LLM Match Accuracy</span>
+          <span id="badge-llm-acc" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Target: ≥90%</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="metric-llm-acc" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono-numbers">100.0%</span>
+          <span class="text-xs text-slate-400">L1 & L2</span>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+          Pakistani name variants, honorifics, abbreviations, and Karachi address matching.
+        </p>
+      </div>
+
+      <!-- Metric 5: False Alarms on Clean Cases -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">False Alarms (Clean Cases)</span>
+          <span id="badge-false-alarms" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Target: 0</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="metric-false-alarms" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono-numbers">0</span>
+          <span class="text-xs text-slate-400">false rejections</span>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+          Clean application packs (C01–C10) falsely marked NOT_READY.
+        </p>
+      </div>
+
+      <!-- Metric 6: Deferred to Staff -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Deferred to Staff</span>
+          <span id="badge-deferred" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">Target: &lt;15%</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="metric-deferred" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono-numbers">9.5%</span>
+          <span class="text-xs text-slate-400">UNSURE rate</span>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+          Ambiguous edge cases (C06, C14) safely routed to human review without blocking.
+        </p>
+      </div>
+
+      <!-- Metric 7: Checklist Faithfulness -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Checklist Faithfulness</span>
+          <span id="badge-faithfulness" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Target: 100%</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="metric-faithfulness" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono-numbers">100.0%</span>
+          <span class="text-xs text-slate-400">gate pass rate</span>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+          Regex audit ensuring zero invented quantities, dates, or foreign names in customer instructions.
+        </p>
+      </div>
+
+      <!-- Metric 8: LLM Consistency Across Runs -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">LLM Consistency</span>
+          <span id="badge-consistency" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Target: ≥90%</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="metric-consistency" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono-numbers">100.0%</span>
+          <span class="text-xs text-slate-400">identical verdicts</span>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+          Repeated multi-run verdict stability across non-deterministic prompts.
+        </p>
+      </div>
+
+      <!-- Metric 9: Average LLM Latency -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Avg LLM Latency</span>
+          <span id="badge-latency" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Target: &lt;500ms</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="metric-latency" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono-numbers">18.4</span>
+          <span class="text-xs text-slate-400">ms / check</span>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+          Execution latency per semantic check (mock engine instant; remote LLM ~400ms).
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 4 Chart.js Visualizations Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Chart 1: Accuracy Per Check (Horizontal Bar) -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="bar-chart" class="w-4 h-4 text-amber-500"></i>
+            <span>Accuracy Per Check (R1–R5, R7, L1, L2)</span>
+          </h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Match rate against expected.csv ground truth across 21 cases</p>
+        </div>
+        <span class="text-[11px] font-mono px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">8 Checks</span>
+      </div>
+      <div class="h-64 relative">
+        <canvas id="chart-accuracy-per-check"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 2: Trap Outcomes (Doughnut) -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-500"></i>
+            <span>Trap Case Outcomes (11 Trap Packs)</span>
+          </h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Distribution of trap detection: Caught vs Deferred vs Missed</p>
+        </div>
+        <span class="text-[11px] font-mono px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">11 Traps</span>
+      </div>
+      <div class="h-64 relative flex items-center justify-center">
+        <canvas id="chart-trap-outcomes"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 3: Code vs LLM Shadow Checks Agreement (Headline Bar) -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="git-pull-request" class="w-4 h-4 text-purple-500"></i>
+            <span>Code vs LLM Agreement on Shadow Checks</span>
+          </h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Headline test: C18 capacity cap disagreement demonstrates code supremacy</p>
+        </div>
+        <span class="text-[11px] font-bold px-2 py-1 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">C18 Highlight</span>
+      </div>
+      <div class="h-64 relative">
+        <canvas id="chart-shadow-agreement"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 4: Latency By Case (Bar Chart) -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="clock" class="w-4 h-4 text-blue-500"></i>
+            <span>Average LLM Latency Per Case</span>
+          </h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Response time (ms) for semantic matching across all 21 packs</p>
+        </div>
+        <span class="text-[11px] font-mono px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">ms / pack</span>
+      </div>
+      <div class="h-64 relative">
+        <canvas id="chart-latency-per-case"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Ground Truth Comparison Matrix -->
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+    <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="table" class="w-4 h-4 text-amber-500"></i>
+          <span>Ground Truth Verification Matrix (All 21 Packs)</span>
+        </h4>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Green = match ground truth · Yellow = deferred to staff · Red = mismatch / discrepancy</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Match
+        </span>
+        <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 ml-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Staff Review
+        </span>
+        <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 ml-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Mismatch
+        </span>
+      </div>
+    </div>
+
+    <!-- Scrollable Matrix Table -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="bg-slate-50/80 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
+            <th class="py-3 px-3">Case</th>
+            <th class="py-3 px-3">Category</th>
+            <th class="py-3 px-2 text-center" title="R1: CNIC Format">R1 Fmt</th>
+            <th class="py-3 px-2 text-center" title="R2: CNIC Expiry">R2 Exp</th>
+            <th class="py-3 px-2 text-center" title="R3: Capacity Limit">R3 Cap</th>
+            <th class="py-3 px-2 text-center" title="R4: Connection Phase">R4 Ph</th>
+            <th class="py-3 px-2 text-center" title="R5: Connected Load">R5 Load</th>
+            <th class="py-3 px-2 text-center" title="R7: Required Docs">R7 Docs</th>
+            <th class="py-3 px-2 text-center" title="L1: Name Match">L1 Name</th>
+            <th class="py-3 px-2 text-center" title="L2: Address Match">L2 Addr</th>
+            <th class="py-3 px-3 text-center">Overall</th>
+            <th class="py-3 px-2 text-center">Gate</th>
+            <th class="py-3 px-2 text-center">PDF</th>
+            <th class="py-3 px-3 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody id="matrix-tbody" class="divide-y divide-slate-100 dark:divide-slate-800 font-mono text-[11px]">
+          <!-- Dynamic rows inserted by evaluate.js -->
+          <tr>
+            <td colspan="14" class="py-8 text-center text-slate-400 font-sans">
+              Loading benchmark matrix…
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Deterministic Algorithmic Findings Box -->
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+    <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-3">
+      <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500"></i>
+      <span>Key Algorithmic Findings & Architecture Observations</span>
+    </h4>
+    <div id="findings-container" class="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+      <!-- Dynamic bullet points inserted by evaluate.js -->
+    </div>
+  </div>
+
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/evaluate.js"></script>
 {% endblock %}

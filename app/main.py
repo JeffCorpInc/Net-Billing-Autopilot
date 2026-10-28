@@ -334,5 +334,52 @@ async def get_audit_trail_endpoint(case_id: str):
     return {"case_id": case_id, "entries": trail}
 
 
+@app.post("/api/evaluate/case/{case_id}")
+async def evaluate_case_endpoint(case_id: str, runs: int = 1):
+    """Evaluate one case against ground truth and store result in data/runtime/eval/."""
+    from app.evaluate import evaluate_single_case
+    try:
+        res = evaluate_single_case(case_id=case_id, runs=runs)
+        return res
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Evaluation failed: {exc}")
+
+
+@app.get("/api/evaluate/summary")
+async def evaluate_summary_endpoint():
+    """Retrieve aggregated metrics from stored evaluation results."""
+    from app.evaluate import compute_summary_metrics, load_all_eval_results
+    evals = load_all_eval_results()
+    if not evals:
+        # If no evals yet, run batch automatically for initial summary
+        from app.evaluate import evaluate_single_case
+        from app.storage import list_case_summaries
+        cases = list_case_summaries()
+        for c in cases:
+            try:
+                evaluate_single_case(c.case_id, runs=1)
+            except Exception:
+                pass
+        evals = load_all_eval_results()
+
+    return compute_summary_metrics(evals)
+
+
+@app.get("/api/evaluate/export.csv")
+async def evaluate_export_csv():
+    """Export per-case, per-check ground truth evaluation matrix as CSV."""
+    from fastapi.responses import Response
+    from app.evaluate import generate_evaluation_csv
+    csv_text = generate_evaluation_csv()
+    return Response(
+        content=csv_text,
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="evaluation_results.csv"'},
+    )
+
+
+
 
 
