@@ -81,3 +81,78 @@ def test_c09_capacity_exceeded(client):
     assert pack["system"]["proposed_kw"] == 12.0
     assert pack["bill"]["sanctioned_load_kw"] == 10.0
     assert pack["system"]["proposed_kw"] > pack["bill"]["sanctioned_load_kw"]
+
+
+def test_create_and_delete_custom_case(client):
+    """Verify creating a custom application pack via POST /api/cases, viewing it, and deleting it."""
+    # Check /new page renders
+    page_res = client.get("/new")
+    assert page_res.status_code == 200
+    assert "Customer Onboarding Form" in page_res.text
+
+    payload = {
+        "description": "Unit test custom case",
+        "applicant_type": "residential",
+        "is_tenant": False,
+        "docs_present": [
+            "cnic", "bill", "ownership", "single_line_diagram",
+            "affidavit", "vendor_checklist", "inverter_datasheet", "inverter_settings_letter"
+        ],
+        "cnic": {
+            "name": "Tariq Jamil",
+            "father_name": "Abdul Jamil",
+            "cnic_no": "42301-1122334-5",
+            "expiry": "2030-12-31",
+            "address": "House 10, Phase 5, DHA, Karachi",
+        },
+        "bill": {
+            "consumer_name": "Tariq Jamil",
+            "reference_no": "0400011223344",
+            "sanctioned_load_kw": 10.0,
+            "connected_load_kw": 8.0,
+            "tariff": "A-1",
+            "connection_phase": "3-phase",
+            "address": "House 10, Phase 5, DHA, Karachi",
+        },
+        "ownership": {
+            "type": "sale_deed",
+            "owner_name": "Tariq Jamil",
+            "property_address": "House 10, Phase 5, DHA, Karachi",
+        },
+        "system": {
+            "proposed_kw": 9.9,
+            "inverter_kw": 10.0,
+            "panel_count": 18,
+            "panel_watt": 550,
+        },
+    }
+
+    create_res = client.post("/api/cases", json=payload)
+    assert create_res.status_code == 200
+    created = create_res.json()
+    case_id = created["case_id"]
+    assert case_id.startswith("U")
+    assert created["report"]["overall"] == "READY"
+
+    try:
+        # Verify upload endpoint works
+        up_res = client.post(
+            f"/api/cases/{case_id}/upload",
+            json={"files": [{"name": "cnic_scan.pdf", "size": 24576}]},
+        )
+        assert up_res.status_code == 200
+        assert len(up_res.json()["files"]) == 1
+
+        # Verify case detail page renders
+        case_page_res = client.get(f"/case/{case_id}")
+        assert case_page_res.status_code == 200
+        assert "Tariq Jamil" in case_page_res.text
+
+        # Built-in cases cannot be deleted
+        bad_del = client.delete("/api/cases/C01")
+        assert bad_del.status_code == 400
+    finally:
+        # Clean up custom case so other tests see exactly 21 cases
+        del_res = client.delete(f"/api/cases/{case_id}")
+        assert del_res.status_code == 200
+

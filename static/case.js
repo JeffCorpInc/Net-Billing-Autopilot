@@ -1,8 +1,8 @@
 /**
  * NetBill Assist - Case Page Client Engine
  * Handles check execution, SVG gauge needle animation, LLM accordion details,
- * cross-document field hover highlights, bilingual checklist, draft PDF iframe,
- * audit trail timeline, and staff review modal.
+ * cross-document field hover highlights, customer checklist, draft PDF iframe,
+ * audit trail timeline, staff review modal, and custom case deletion.
  */
 
 const CasePage = {
@@ -29,6 +29,11 @@ const CasePage = {
     const reviewBtn = document.getElementById('case-review-btn');
     if (reviewBtn) {
       reviewBtn.addEventListener('click', () => this.openReviewModal());
+    }
+
+    const deleteBtn = document.getElementById('case-delete-btn');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', () => this.deleteCustomCase());
     }
   },
 
@@ -132,17 +137,6 @@ const CasePage = {
 
   setChecklistLang(lang) {
     this.checklistLang = lang;
-    const btnEn = document.getElementById('case-lang-en');
-    const btnUr = document.getElementById('case-lang-ur');
-    if (btnEn && btnUr) {
-      if (lang === 'ur') {
-        btnUr.className = 'px-2.5 py-1 rounded-lg transition-colors bg-amber-500 text-slate-950 font-bold';
-        btnEn.className = 'px-2.5 py-1 rounded-lg transition-colors text-slate-600 dark:text-slate-400';
-      } else {
-        btnEn.className = 'px-2.5 py-1 rounded-lg transition-colors bg-amber-500 text-slate-950 font-bold';
-        btnUr.className = 'px-2.5 py-1 rounded-lg transition-colors text-slate-600 dark:text-slate-400';
-      }
-    }
     this.loadChecklist();
   },
 
@@ -252,6 +246,8 @@ const CasePage = {
       }
 
       const iconMap = {
+        case_created: 'file-plus-2',
+        files_uploaded: 'paperclip',
         checks_run: 'play-circle',
         checklist_generated: 'list-checks',
         draft_generated: 'file-text',
@@ -266,7 +262,11 @@ const CasePage = {
 
         const d = ev.details || ev || {};
         let detailText = '';
-        if (ev.event === 'checks_run') {
+        if (ev.event === 'case_created') {
+          detailText = `Custom application pack created for <strong>${d.applicant_name || 'Applicant'}</strong> (${d.proposed_kw ?? 0} kW system, ${d.docs_count ?? 0} docs attached)`;
+        } else if (ev.event === 'files_uploaded') {
+          detailText = `Uploaded ${d.count ?? 0} supporting scan(s): <strong>${(d.files || []).join(', ')}</strong>`;
+        } else if (ev.event === 'checks_run') {
           detailText = `Ran compliance checks (${d.mode || 'code'} mode) → Status: <strong>${d.overall || 'PENDING'}</strong> (${d.readiness_score ?? 0}% readiness)`;
         } else if (ev.event === 'checklist_generated') {
           detailText = `Customer checklist compiled in <strong>${(d.lang || 'en').toUpperCase()}</strong> (${d.gate || 'passed'} gate, source: ${d.source || 'template'})`;
@@ -408,6 +408,27 @@ const CasePage = {
         }
       }
     });
+  },
+
+  deleteCustomCase() {
+    window.NetBill.Modal.open(
+      `Delete Custom Case ${this.caseId}?`,
+      `<p class="text-xs text-slate-600 dark:text-slate-300">Are you sure you want to permanently delete custom application pack <strong>${this.caseId}</strong> and its audit history?</p>`,
+      async () => {
+        try {
+          const res = await fetch(`/api/cases/${this.caseId}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error('Failed to delete custom case');
+          if (window.NetBill?.Toast) {
+            window.NetBill.Toast.show('Case Deleted', `${this.caseId} was removed.`, 'success');
+          }
+          setTimeout(() => { window.location.href = '/'; }, 400);
+        } catch (err) {
+          if (window.NetBill?.Toast) {
+            window.NetBill.Toast.show('Error', err.message, 'error');
+          }
+        }
+      }
+    );
   }
 };
 

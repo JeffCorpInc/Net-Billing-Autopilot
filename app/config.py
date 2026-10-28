@@ -11,6 +11,8 @@ BASE_DIR = APP_DIR.parent
 DATA_DIR = BASE_DIR / "data"
 CASES_DIR = DATA_DIR / "cases"
 RUNTIME_DIR = DATA_DIR / "runtime"
+CUSTOM_CASES_DIR = RUNTIME_DIR / "custom_cases"
+UPLOADS_DIR = RUNTIME_DIR / "uploads"
 REPORTS_DIR = RUNTIME_DIR / "reports"
 AUDIT_DIR = RUNTIME_DIR / "audit"
 EVAL_DIR = RUNTIME_DIR / "eval"
@@ -19,7 +21,7 @@ LLM_LOG_PATH = RUNTIME_DIR / "llm_log.jsonl"
 REVIEWS_PATH = RUNTIME_DIR / "reviews.json"
 
 # Ensure runtime directories exist
-for _dir in (DATA_DIR, CASES_DIR, RUNTIME_DIR, REPORTS_DIR, AUDIT_DIR, EVAL_DIR):
+for _dir in (DATA_DIR, CASES_DIR, RUNTIME_DIR, CUSTOM_CASES_DIR, UPLOADS_DIR, REPORTS_DIR, AUDIT_DIR, EVAL_DIR):
     _dir.mkdir(parents=True, exist_ok=True)
 
 # Regulatory constants

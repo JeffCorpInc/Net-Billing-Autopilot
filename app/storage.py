@@ -1,15 +1,18 @@
 """File-based persistence for packs, runtime reports, reviews, and audit trails."""
 
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
 from app.config import (
     AUDIT_DIR,
     CASES_DIR,
+    CUSTOM_CASES_DIR,
     LOAD_FLOW_THRESHOLD_KW,
     REPORTS_DIR,
     REVIEWS_PATH,
+    UPLOADS_DIR,
 )
 from app.models import CaseReport, CaseSummary, Pack
 
@@ -52,8 +55,10 @@ def save_review(case_id: str, staff_name: str, note: str = "") -> dict[str, Any]
 
 
 def get_pack(case_id: str) -> Pack | None:
-    """Load pack JSON for a given case ID."""
+    """Load pack JSON for a given case ID (checks both built-in and custom user cases)."""
     file_path = CASES_DIR / f"{case_id}.json"
+    if not file_path.exists():
+        file_path = CUSTOM_CASES_DIR / f"{case_id}.json"
     if not file_path.exists():
         return None
     try:
@@ -62,6 +67,58 @@ def get_pack(case_id: str) -> Pack | None:
         return Pack.model_validate(data)
     except Exception:
         return None
+
+
+def next_custom_case_id() -> str:
+    """Generate the next sequential user case ID (U01, U02, ...)."""
+    CUSTOM_CASES_DIR.mkdir(parents=True, exist_ok=True)
+    existing = []
+    for p in CUSTOM_CASES_DIR.glob("U*.json"):
+        stem = p.stem
+        if stem.startswith("U") and stem[1:].isdigit():
+            existing.append(int(stem[1:]))
+    next_num = (max(existing) + 1) if existing else 1
+    return f"U{next_num:02d}"
+
+
+def save_custom_pack(pack: Pack) -> Pack:
+    """Persist a user-created application pack to data/runtime/custom_cases/."""
+    CUSTOM_CASES_DIR.mkdir(parents=True, exist_ok=True)
+    file_path = CUSTOM_CASES_DIR / f"{pack.case_id}.json"
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(pack.model_dump(), f, indent=2, ensure_ascii=False)
+    return pack
+
+
+def delete_custom_pack(case_id: str) -> bool:
+    """Delete a custom user case (U* only) and its associated runtime artifacts."""
+    if not case_id.upper().startswith("U"):
+        return False
+    pack_file = CUSTOM_CASES_DIR / f"{case_id}.json"
+    if not pack_file.exists():
+        return False
+    pack_file.unlink(missing_ok=True)
+    (REPORTS_DIR / f"{case_id}.json").unlink(missing_ok=True)
+    (AUDIT_DIR / f"{case_id}.jsonl").unlink(missing_ok=True)
+    uploads_dir = UPLOADS_DIR / case_id
+    if uploads_dir.exists():
+        shutil.rmtree(uploads_dir, ignore_errors=True)
+    return True
+
+
+def list_uploaded_files(case_id: str) -> list[dict[str, Any]]:
+    """Return metadata for any uploaded document files for a case."""
+    case_uploads = UPLOADS_DIR / case_id
+    if not case_uploads.exists():
+        return []
+    files = []
+    for f in sorted(case_uploads.iterdir()):
+        if f.is_file():
+            files.append({
+                "filename": f.name,
+                "size_kb": round(f.stat().st_size / 1024, 1),
+            })
+    return files
 
 
 def get_latest_report(case_id: str) -> CaseReport | None:
@@ -84,13 +141,20 @@ def save_report(report: CaseReport) -> None:
         json.dump(report.model_dump(), f, indent=2, ensure_ascii=False)
 
 
-def list_case_summaries() -> list[CaseSummary]:
+def list_case_summaries(include_custom: bool = True) -> list[CaseSummary]:
     """List all cases with summary statistics for the dashboard."""
     summaries = []
     reviews = load_reviews()
 
-    # Iterate C01 to C21 in order
-    case_files = sorted(CASES_DIR.glob("*.json"), key=lambda p: p.stem)
+    # Custom user cases first (newest first), then C01 to C21 in order
+    case_files: list[Path] = []
+    if include_custom and CUSTOM_CASES_DIR.exists():
+        custom_files = sorted(CUSTOM_CASES_DIR.glob("U*.json"), key=lambda p: p.stem, reverse=True)
+        case_files.extend(custom_files)
+
+    builtin_files = sorted(CASES_DIR.glob("*.json"), key=lambda p: p.stem)
+    case_files.extend(builtin_files)
+
     for path in case_files:
         try:
             with open(path, "r", encoding="utf-8") as f:

@@ -96,11 +96,23 @@ async def dashboard_page(request: Request):
     return templates.TemplateResponse(request=request, name="dashboard.html", context=context)
 
 
+@app.get("/new", response_class=HTMLResponse)
+async def new_case_page(request: Request):
+    """Render guided intake form for creating a new application pack."""
+    from app.storage import next_custom_case_id
+    context = get_base_context(request)
+    context.update({
+        "active_page": "new_case",
+        "next_case_id": next_custom_case_id(),
+    })
+    return templates.TemplateResponse(request=request, name="new_case.html", context=context)
+
+
 @app.get("/case/{case_id}", response_class=HTMLResponse)
 @app.get("/cases/{case_id}", response_class=HTMLResponse)
 async def case_page(request: Request, case_id: str):
     """Render individual application case page."""
-    from app.storage import get_latest_report, get_pack, load_reviews
+    from app.storage import get_latest_report, get_pack, list_uploaded_files, load_reviews
     pack = get_pack(case_id)
     if not pack:
         raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
@@ -108,6 +120,7 @@ async def case_page(request: Request, case_id: str):
     report = get_latest_report(case_id)
     reviews = load_reviews()
     review = reviews.get(case_id)
+    uploaded_files = list_uploaded_files(case_id)
 
     context = get_base_context(request)
     context.update({
@@ -116,6 +129,8 @@ async def case_page(request: Request, case_id: str):
         "pack": pack,
         "report": report,
         "review": review,
+        "uploaded_files": uploaded_files,
+        "is_custom_case": case_id.upper().startswith("U"),
     })
     return templates.TemplateResponse(request=request, name="case.html", context=context)
 
@@ -155,10 +170,126 @@ async def health_check():
 
 @app.get("/api/cases")
 async def get_all_cases():
-    """Return summary list of all 21 application cases for the dashboard."""
+    """Return summary list of all application cases (custom + 21 benchmark) for the dashboard."""
     from app.storage import list_case_summaries
     summaries = list_case_summaries()
     return [s.model_dump() for s in summaries]
+
+
+@app.post("/api/cases")
+async def create_new_case(request: Request):
+    """Create a new custom user application pack, run compliance checks, and persist it."""
+    from app.audit import log_audit_event
+    from app.llm_checks import run_l1_name_check, run_l2_address_check, run_shadow_checks
+    from app.merge import build_case_report
+    from app.models import Pack
+    from app.rules import run_code_rules
+    from app.storage import next_custom_case_id, save_custom_pack
+
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+    # Auto-assign next U01, U02... case_id
+    case_id = next_custom_case_id()
+    payload["case_id"] = case_id
+
+    if not payload.get("category"):
+        payload["category"] = "clean"
+    if not payload.get("description"):
+        payload["description"] = "Custom staff-entered net-billing application pack"
+
+    try:
+        pack = Pack.model_validate(payload)
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Validation error: {exc}")
+
+    # Run deterministic rules first so we can auto-classify category ("clean" vs "trap")
+    rule_results = run_code_rules(pack)
+    l1_res = run_l1_name_check(pack)
+    l2_res = run_l2_address_check(pack)
+    llm_results = [l1_res, l2_res]
+    shadow_checks = run_shadow_checks(pack)
+
+    any_fail = any(r.status == "FAIL" for r in (rule_results + llm_results))
+    pack.category = "trap" if any_fail else "clean"
+
+    save_custom_pack(pack)
+
+    log_audit_event(
+        case_id=case_id,
+        event_type="case_created",
+        details={
+            "applicant_name": pack.cnic.name,
+            "proposed_kw": pack.system.proposed_kw,
+            "docs_count": len(pack.docs_present),
+        },
+    )
+
+    report = build_case_report(
+        pack=pack,
+        rule_results=rule_results,
+        llm_results=llm_results,
+        shadow_checks=shadow_checks,
+    )
+
+    return {
+        "status": "ok",
+        "case_id": case_id,
+        "pack": pack.model_dump(),
+        "report": report.model_dump(),
+    }
+
+
+@app.post("/api/cases/{case_id}/upload")
+async def upload_case_files(case_id: str, request: Request):
+    """Save optional uploaded document files (metadata or multipart) for a custom case."""
+    from app.audit import log_audit_event
+    from app.config import UPLOADS_DIR
+    from app.storage import get_pack, list_uploaded_files
+
+    pack = get_pack(case_id)
+    if not pack:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+
+    case_upload_dir = UPLOADS_DIR / case_id
+    case_upload_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        data = await request.json()
+        files_meta = data.get("files", [])
+        for fmeta in files_meta:
+            safe_name = Path(str(fmeta.get("name", "document.pdf"))).name
+            content_summary = f"Uploaded file placeholder: {safe_name} ({fmeta.get('size', 0)} bytes)"
+            (case_upload_dir / safe_name).write_text(content_summary, encoding="utf-8")
+    except Exception:
+        pass
+
+    saved = list_uploaded_files(case_id)
+    if saved:
+        log_audit_event(
+            case_id=case_id,
+            event_type="files_uploaded",
+            details={"count": len(saved), "files": [f["filename"] for f in saved]},
+        )
+
+    return {"status": "ok", "files": saved}
+
+
+@app.delete("/api/cases/{case_id}")
+async def delete_case_endpoint(case_id: str):
+    """Delete a custom user-created case (U* only)."""
+    from app.storage import delete_custom_pack
+    if not case_id.upper().startswith("U"):
+        raise HTTPException(
+            status_code=400,
+            detail="Built-in benchmark cases (C01-C21) cannot be deleted.",
+        )
+    deleted = delete_custom_pack(case_id.upper())
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Custom case {case_id} not found")
+    return {"status": "ok", "deleted": case_id.upper()}
 
 
 @app.get("/api/cases/{case_id}")
