@@ -12,9 +12,6 @@
     const trapBtn = document.getElementById('fill-trap-btn');
     const fileInput = document.getElementById('f-file-upload');
 
-    // Fill Clean Sample by default so user can test immediately or edit any field
-    fillCleanSample();
-
     if (cleanBtn) cleanBtn.addEventListener('click', () => {
       fillCleanSample();
       if (window.NetBill?.Toast) {
@@ -231,3 +228,4 @@
     }
   }
 })();
+
