@@ -1,6 +1,9 @@
 .env
 .venv/
-data/runtime/
+data/runtime/custom_cases/
+data/runtime/uploads/
+data/runtime/audit/
+data/runtime/llm_log.jsonl
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -9,3 +12,4 @@ htmlcov/
 *.egg-info/
 .DS_Store
 Thumbs.db
+

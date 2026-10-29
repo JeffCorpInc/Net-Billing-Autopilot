@@ -1,0 +1,147 @@
+{
+  "case_id": "C16",
+  "timestamp": "2026-10-29T19:24:13.220795+00:00",
+  "mode": "live",
+  "overall": "NOT_READY",
+  "readiness_score": 62.5,
+  "results": [
+    {
+      "id": "R1",
+      "key": "cnic_format",
+      "name": "CNIC format",
+      "status": "PASS",
+      "detail": "CNIC format is valid (42101-1000555-1)",
+      "citation": "NADRA CNIC format",
+      "source": "code",
+      "data": {
+        "cnic_no": "42101-1000555-1",
+        "valid": true
+      },
+      "llm": null
+    },
+    {
+      "id": "R2",
+      "key": "cnic_expiry",
+      "name": "CNIC validity",
+      "status": "PASS",
+      "detail": "CNIC is valid until 2030-10-28 (1459 days remaining)",
+      "citation": "Installer policy",
+      "source": "code",
+      "data": {
+        "expiry": "2030-10-28",
+        "today": "2026-10-30",
+        "days_remaining": 1459
+      },
+      "llm": null
+    },
+    {
+      "id": "R3",
+      "key": "capacity",
+      "name": "System size",
+      "status": "PASS",
+      "detail": "Proposed 300.0 kW is within the sanctioned load of 400.0 kW",
+      "citation": "Reg. 3(2)",
+      "source": "code",
+      "data": {
+        "proposed_kw": 300.0,
+        "sanctioned_load_kw": 400.0
+      },
+      "llm": null
+    },
+    {
+      "id": "R4",
+      "key": "connection_phase",
+      "name": "Connection type",
+      "status": "PASS",
+      "detail": "3-phase connection verified",
+      "citation": "Reg. 2(1)(v)",
+      "source": "code",
+      "data": {
+        "connection_phase": "3-phase"
+      },
+      "llm": null
+    },
+    {
+      "id": "R5",
+      "key": "required_docs",
+      "name": "Required documents",
+      "status": "FAIL",
+      "detail": "Missing 1 required document(s): Load-flow study",
+      "citation": "Reg. 3(3), 3(4), Sch. II & V; KE Guidelines",
+      "source": "code",
+      "data": {
+        "required": [
+          "cnic",
+          "bill",
+          "ownership",
+          "single_line_diagram",
+          "affidavit",
+          "vendor_checklist",
+          "inverter_datasheet",
+          "inverter_settings_letter",
+          "load_flow_study",
+          "ntn",
+          "form_29"
+        ],
+        "missing": [
+          "load_flow_study"
+        ],
+        "present_count": 10,
+        "required_count": 11
+      },
+      "llm": null
+    },
+    {
+      "id": "R6",
+      "key": "fee",
+      "name": "Fee estimate",
+      "status": "INFO",
+      "detail": "Estimated NEPRA fee: Rs 300,000 (300.0 kW × Rs 1,000)",
+      "citation": "Schedule-IV",
+      "source": "code",
+      "data": {
+        "proposed_kw": 300.0,
+        "fee_rs": 300000,
+        "rate_per_kw": 1000
+      },
+      "llm": null
+    },
+    {
+      "id": "R7",
+      "key": "connected_load",
+      "name": "Connected load",
+      "status": "PASS",
+      "detail": "Connected load (400.0 kW) does not exceed sanctioned load (400.0 kW)",
+      "citation": "KE Guidelines",
+      "source": "code",
+      "data": {
+        "connected_load_kw": 400.0,
+        "sanctioned_load_kw": 400.0
+      },
+      "llm": null
+    },
+    {
+      "id": "L1",
+      "key": "name_match",
+      "name": "Name consistency",
+      "status": "PENDING",
+      "detail": "Pending Phase 3 LLM evaluation",
+      "citation": "Applicant Identity Verification",
+      "source": "mock-llm",
+      "data": {},
+      "llm": null
+    },
+    {
+      "id": "L2",
+      "key": "address_match",
+      "name": "Address consistency",
+      "status": "PENDING",
+      "detail": "Pending Phase 3 LLM evaluation",
+      "citation": "Premises Verification",
+      "source": "mock-llm",
+      "data": {},
+      "llm": null
+    }
+  ],
+  "shadow_checks": []
+}

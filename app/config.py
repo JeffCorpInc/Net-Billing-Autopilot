@@ -10,7 +10,21 @@ APP_DIR = Path(__file__).resolve().parent
 BASE_DIR = APP_DIR.parent
 DATA_DIR = BASE_DIR / "data"
 CASES_DIR = DATA_DIR / "cases"
-RUNTIME_DIR = DATA_DIR / "runtime"
+
+# On Vercel / serverless platforms, root filesystem is read-only.
+# Automatically use /tmp/netbill_runtime so all features work 100% without disk errors.
+IS_VERCEL = bool(os.getenv("VERCEL") == "1" or os.getenv("NOW_BUILDER") == "1")
+if IS_VERCEL:
+    RUNTIME_DIR = Path("/tmp") / "netbill_runtime"
+else:
+    # Test if data/runtime is writable; fall back to /tmp if read-only
+    _test_dir = DATA_DIR / "runtime"
+    try:
+        _test_dir.mkdir(parents=True, exist_ok=True)
+        RUNTIME_DIR = _test_dir
+    except OSError:
+        RUNTIME_DIR = Path("/tmp") / "netbill_runtime"
+
 CUSTOM_CASES_DIR = RUNTIME_DIR / "custom_cases"
 UPLOADS_DIR = RUNTIME_DIR / "uploads"
 REPORTS_DIR = RUNTIME_DIR / "reports"
@@ -22,7 +36,28 @@ REVIEWS_PATH = RUNTIME_DIR / "reviews.json"
 
 # Ensure runtime directories exist
 for _dir in (DATA_DIR, CASES_DIR, RUNTIME_DIR, CUSTOM_CASES_DIR, UPLOADS_DIR, REPORTS_DIR, AUDIT_DIR, EVAL_DIR):
-    _dir.mkdir(parents=True, exist_ok=True)
+    try:
+        _dir.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
+
+# Seed pre-bundled runtime reports and evaluations into /tmp if running on serverless
+if RUNTIME_DIR != (DATA_DIR / "runtime") and (DATA_DIR / "runtime").exists():
+    import shutil
+    for _sub in ("reports", "eval", "custom_cases"):
+        _src = DATA_DIR / "runtime" / _sub
+        _dst = RUNTIME_DIR / _sub
+        if _src.exists() and not _dst.exists():
+            try:
+                shutil.copytree(str(_src), str(_dst), dirs_exist_ok=True)
+            except Exception:
+                pass
+    _rev_src = DATA_DIR / "runtime" / "reviews.json"
+    if _rev_src.exists() and not REVIEWS_PATH.exists():
+        try:
+            shutil.copy(str(_rev_src), str(REVIEWS_PATH))
+        except Exception:
+            pass
 
 # Regulatory constants
 RULES_AS_OF = "2026-04-13"

@@ -1,0 +1,192 @@
+{
+  "case_id": "C18",
+  "timestamp": "2026-10-29T19:24:33.115385+00:00",
+  "mode": "mock",
+  "overall": "NOT_READY",
+  "readiness_score": 75.0,
+  "results": [
+    {
+      "id": "R1",
+      "key": "cnic_format",
+      "name": "CNIC format",
+      "status": "PASS",
+      "detail": "CNIC format is valid (42101-1000629-1)",
+      "citation": "NADRA CNIC format",
+      "source": "code",
+      "data": {
+        "cnic_no": "42101-1000629-1",
+        "valid": true
+      },
+      "llm": null
+    },
+    {
+      "id": "R2",
+      "key": "cnic_expiry",
+      "name": "CNIC validity",
+      "status": "FAIL",
+      "detail": "CNIC expired on 2026-09-15 (45 days ago). Valid unexpired CNIC required.",
+      "citation": "Installer policy",
+      "source": "code",
+      "data": {
+        "expiry": "2026-09-15",
+        "today": "2026-10-30",
+        "days_remaining": -45
+      },
+      "llm": null
+    },
+    {
+      "id": "R3",
+      "key": "capacity",
+      "name": "System size",
+      "status": "FAIL",
+      "detail": "Proposed 14.0 kW exceeds the sanctioned load of 10.0 kW",
+      "citation": "Reg. 3(2)",
+      "source": "code",
+      "data": {
+        "proposed_kw": 14.0,
+        "sanctioned_load_kw": 10.0
+      },
+      "llm": null
+    },
+    {
+      "id": "R4",
+      "key": "connection_phase",
+      "name": "Connection type",
+      "status": "PASS",
+      "detail": "3-phase connection verified",
+      "citation": "Reg. 2(1)(v)",
+      "source": "code",
+      "data": {
+        "connection_phase": "3-phase"
+      },
+      "llm": null
+    },
+    {
+      "id": "R5",
+      "key": "required_docs",
+      "name": "Required documents",
+      "status": "PASS",
+      "detail": "All 8 required documents are present in pack",
+      "citation": "Reg. 3(3), 3(4), Sch. II & V; KE Guidelines",
+      "source": "code",
+      "data": {
+        "required": [
+          "cnic",
+          "bill",
+          "ownership",
+          "single_line_diagram",
+          "affidavit",
+          "vendor_checklist",
+          "inverter_datasheet",
+          "inverter_settings_letter"
+        ],
+        "missing": [],
+        "present_count": 8,
+        "required_count": 8
+      },
+      "llm": null
+    },
+    {
+      "id": "R6",
+      "key": "fee",
+      "name": "Fee estimate",
+      "status": "INFO",
+      "detail": "Estimated NEPRA fee: Rs 14,000 (14.0 kW × Rs 1,000)",
+      "citation": "Schedule-IV",
+      "source": "code",
+      "data": {
+        "proposed_kw": 14.0,
+        "fee_rs": 14000,
+        "rate_per_kw": 1000
+      },
+      "llm": null
+    },
+    {
+      "id": "R7",
+      "key": "connected_load",
+      "name": "Connected load",
+      "status": "PASS",
+      "detail": "Connected load (10.0 kW) does not exceed sanctioned load (10.0 kW)",
+      "citation": "KE Guidelines",
+      "source": "code",
+      "data": {
+        "connected_load_kw": 10.0,
+        "sanctioned_load_kw": 10.0
+      },
+      "llm": null
+    },
+    {
+      "id": "L1",
+      "key": "name_match",
+      "name": "Name consistency",
+      "status": "PASS",
+      "detail": "Names refer to the same individual accounting for standard Pakistani spelling variants or abbreviations.",
+      "citation": "Applicant Identity Verification",
+      "source": "mock-llm",
+      "data": {
+        "fuzzy_score": 100.0,
+        "is_tenant": false,
+        "cnic_name": "Babar Azam",
+        "bill_name": "Babar Azam",
+        "deed_name": "Babar Azam"
+      },
+      "llm": {
+        "verdict": "PASS",
+        "confidence": 0.98,
+        "reason": "Names refer to the same individual accounting for standard Pakistani spelling variants or abbreviations.",
+        "evidence": [
+          "cnic_name: 'Babar Azam' vs bill_consumer_name: 'Babar Azam'"
+        ],
+        "fuzzy_score": 100.0,
+        "latency_ms": 20,
+        "model": "mock-engine",
+        "provider": "mock"
+      }
+    },
+    {
+      "id": "L2",
+      "key": "address_match",
+      "name": "Address consistency",
+      "status": "PASS",
+      "detail": "Addresses refer to the same premises with standard abbreviation variations (H#, Blk, Khi).",
+      "citation": "Premises Verification",
+      "source": "mock-llm",
+      "data": {
+        "fuzzy_score": 100.0,
+        "cnic_address": "B-142, Block 5, Clifton, Karachi",
+        "bill_address": "B-142, Block 5, Clifton, Karachi",
+        "deed_address": "B-142, Block 5, Clifton, Karachi"
+      },
+      "llm": {
+        "verdict": "PASS",
+        "confidence": 0.98,
+        "reason": "Addresses refer to the same premises with standard abbreviation variations (H#, Blk, Khi).",
+        "evidence": [
+          "cnic_address: 'B-142, Block 5, Clifton, Karachi' vs bill_address: 'B-142, Block 5, Clifton, Karachi'"
+        ],
+        "fuzzy_score": 100.0,
+        "latency_ms": 20,
+        "model": "mock-engine",
+        "provider": "mock"
+      }
+    }
+  ],
+  "shadow_checks": [
+    {
+      "check": "R2 (CNIC Expiry)",
+      "code_verdict": true,
+      "llm_verdict": false,
+      "agree": false,
+      "note": "Disagreement",
+      "reasoning": "Mock LLM mistakenly judged 14 kW acceptable for sanctioned load."
+    },
+    {
+      "check": "R3 (Capacity Limit)",
+      "code_verdict": false,
+      "llm_verdict": true,
+      "agree": false,
+      "note": "LLM said capacity OK, code found 14.0 kW > 10.0 kW → code decides",
+      "reasoning": "Mock LLM mistakenly judged 14 kW acceptable for sanctioned load."
+    }
+  ]
+}
