@@ -482,6 +482,32 @@ async def assistant_chat_endpoint(request: Request):
     return result
 
 
+@app.get("/api/ocr/status")
+def ocr_status_endpoint():
+    """Return readiness and supported documents for the backend OCR extractor."""
+    from app.ocr import get_ocr_status
+    return get_ocr_status()
+
+
+@app.post("/api/ocr/extract")
+async def ocr_extract_endpoint(request: Request):
+    """Run backend OCR & document field extraction on uploaded files (CNIC, Bill, Deed, System Specs)."""
+    from fastapi.concurrency import run_in_threadpool
+    from app.ocr import extract_documents_from_uploads
+
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload for OCR extraction")
+
+    files = body.get("files")
+    if not isinstance(files, list) or len(files) == 0:
+        raise HTTPException(status_code=400, detail="No files provided for OCR extraction")
+
+    result = await run_in_threadpool(extract_documents_from_uploads, files)
+    return result
+
+
 @app.get("/api/cases/{case_id}")
 async def get_case_detail(case_id: str):
     """Retrieve full pack, latest report, and staff review for a case."""

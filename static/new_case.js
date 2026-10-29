@@ -71,6 +71,8 @@
         hasScrolledToBottom = false;
         if (consentCheckbox) consentCheckbox.checked = false;
         if (consentScrollBody) consentScrollBody.scrollTop = 0;
+        const ocrBanner = document.getElementById('ocr-status-banner');
+        if (ocrBanner) ocrBanner.classList.add('hidden');
         updateConsentSubmitState();
         if (window.NetBill?.Toast) {
           window.NetBill.Toast.show('Form Cleared', 'All application fields and consent have been reset.', 'info');
@@ -79,7 +81,7 @@
     }
 
     if (fileInput) {
-      fileInput.addEventListener('change', (e) => {
+      fileInput.addEventListener('change', async (e) => {
         const incoming = Array.from(e.target.files || []);
         incoming.forEach(f => {
           if (!selectedFilesBuffer.some(existing => existing.name === f.name)) {
@@ -88,6 +90,9 @@
         });
         fileInput.value = ''; // Reset input so user can pick more files if desired
         renderSelectedFiles();
+        if (incoming.length > 0) {
+          await runAutoOcrOnFiles(incoming);
+        }
       });
     }
 
@@ -393,6 +398,139 @@
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+  }
+
+  async function runAutoOcrOnFiles(filesToScan) {
+    const banner = document.getElementById('ocr-status-banner');
+    if (banner) {
+      banner.className = 'p-3 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50/80 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center justify-between gap-3';
+      banner.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin shrink-0"></span>
+          <span>Running Backend OCR on ${filesToScan.length} uploaded file(s) &amp; auto-filling form fields…</span>
+        </div>
+      `;
+    }
+
+    try {
+      const filesPayload = [];
+      for (const f of filesToScan) {
+        const b64 = await readFileAsBase64(f);
+        filesPayload.push({
+          name: f.name,
+          size: f.size,
+          type: f.type,
+          content_base64: b64,
+        });
+      }
+
+      const res = await fetch('/api/ocr/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ files: filesPayload }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'OCR extraction failed');
+      }
+
+      const fields = data.fields || {};
+      const docsDetected = data.docs_detected || [];
+
+      const fieldIdMap = {
+        description: 'f-description',
+        applicant_type: 'f-applicant-type',
+        cnic_name: 'f-cnic-name',
+        cnic_father: 'f-cnic-father',
+        cnic_no: 'f-cnic-no',
+        cnic_expiry: 'f-cnic-expiry',
+        cnic_address: 'f-cnic-address',
+        bill_name: 'f-bill-name',
+        bill_ref: 'f-bill-ref',
+        bill_tariff: 'f-bill-tariff',
+        sanctioned_kw: 'f-sanctioned-kw',
+        connected_kw: 'f-connected-kw',
+        phase: 'f-phase',
+        bill_address: 'f-bill-address',
+        ownership_type: 'f-ownership-type',
+        owner_name: 'f-owner-name',
+        property_address: 'f-property-address',
+        proposed_kw: 'f-proposed-kw',
+        inverter_kw: 'f-inverter-kw',
+        panel_count: 'f-panel-count',
+        panel_watt: 'f-panel-watt',
+      };
+
+      let filledCount = 0;
+      Object.entries(fieldIdMap).forEach(([key, domId]) => {
+        if (fields[key] !== undefined && fields[key] !== null && fields[key] !== '') {
+          const el = document.getElementById(domId);
+          if (el) {
+            el.value = String(fields[key]);
+            el.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-50/40');
+            setTimeout(() => {
+              el.classList.remove('ring-emerald-500', 'bg-emerald-50/40');
+            }, 3000);
+            filledCount++;
+          }
+        }
+      });
+
+      if (typeof fields.is_tenant === 'boolean') {
+        const tenantBox = document.getElementById('f-is-tenant');
+        if (tenantBox) {
+          tenantBox.checked = fields.is_tenant;
+          filledCount++;
+        }
+      }
+
+      // Check detected document checkboxes in Step 4
+      if (docsDetected.length > 0) {
+        const docSet = new Set(docsDetected);
+        document.querySelectorAll('.doc-checkbox').forEach(cb => {
+          if (docSet.has(cb.value)) {
+            cb.checked = true;
+          }
+        });
+      }
+
+      if (banner) {
+        const warnHtml = (data.warnings && data.warnings.length > 0)
+          ? `<div class="mt-1 text-[11px] text-amber-700 dark:text-amber-300 font-medium">⚠ ${data.warnings.join(' · ')}</div>`
+          : '';
+        banner.className = 'p-3 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/90 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 text-xs font-semibold flex flex-col gap-1';
+        banner.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
+              <span>${data.summary || `Auto-filled ${filledCount} field(s) via Backend OCR.`}</span>
+            </span>
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/20">${data.elapsed_ms || 1} ms</span>
+          </div>
+          ${warnHtml}
+        `;
+        if (window.lucide) window.lucide.createIcons({ root: banner });
+      }
+
+      if (window.NetBill?.Toast) {
+        window.NetBill.Toast.show(
+          'OCR Auto-Fill Complete',
+          `Populated ${filledCount} form field(s) and ${docsDetected.length} document checkbox(es).`,
+          'success'
+        );
+      }
+
+      // Trigger AI Copilot background inspection on the newly OCR-populated fields
+      if (window.AssistantCopilot?.silentBackgroundCheck) {
+        window.AssistantCopilot.silentBackgroundCheck();
+      }
+    } catch (err) {
+      if (banner) {
+        banner.className = 'p-3 rounded-xl border border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-semibold';
+        banner.textContent = `OCR Error: ${err.message}`;
+      }
+    }
   }
 
   async function submitCaseForm(e) {

@@ -286,13 +286,24 @@
       </div>
       {% endif %}
 
-      <!-- Upload New Files Dropzone -->
-      <div class="pt-2">
-        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-          {% if edit_mode %}Upload Additional Scans (PDF, JPG, PNG){% else %}Attach Supporting Scans (PDF, JPG, PNG){% endif %}
-        </label>
+      <!-- Upload New Files Dropzone (Auto-OCR Enabled) -->
+      <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <label for="f-file-upload" class="block text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+            <i data-lucide="scan-line" class="w-4 h-4 text-amber-500"></i>
+            <span>{% if edit_mode %}Upload Additional Scans — Auto-OCR Enabled (PDF, JPG, PNG){% else %}Upload Documents (CNIC, K-Electric Bill, Sale Deed, Solar Specs) — Auto-OCR Enabled{% endif %}</span>
+          </label>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold uppercase tracking-wider">
+            Instant Backend OCR Auto-Fill
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400">
+          Select one or more document files below (e.g. from <code class="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">data/ocr_samples/</code>). The backend OCR engine immediately reads the uploaded files and populates all matching form fields automatically.
+        </p>
         <input id="f-file-upload" type="file" multiple accept=".pdf,.png,.jpg,.jpeg"
-          class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-500/15 file:text-amber-700 dark:file:text-amber-300 hover:file:bg-amber-500/25 cursor-pointer">
+          class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer">
+        <!-- Live OCR Extraction Status Banner -->
+        <div id="ocr-status-banner" class="hidden p-3 rounded-xl border text-xs font-medium flex items-center justify-between gap-3"></div>
         <div id="selected-files-list" class="mt-2 flex flex-wrap gap-2 text-[11px] text-slate-500"></div>
       </div>
     </div>
@@ -439,5 +450,5 @@
 <script>
   window.__INITIAL_PACK__ = {{ pack_json | safe }};
 </script>
-<script src="/static/new_case.js?v=7"></script>
+<script src="/static/new_case.js?v=8"></script>
 {% endblock %}
