@@ -33,16 +33,27 @@
         </p>
       </div>
 
-      <!-- Quick Sample Fillers -->
+      <!-- Quick Sample Fillers & Clear Form Action -->
       <div class="shrink-0 flex flex-wrap items-center gap-2.5">
-        <button id="fill-clean-btn" type="button" class="px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs transition-all flex items-center gap-1.5 shadow">
+        <button id="fill-clean-btn" type="button" class="px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs transition-all flex items-center gap-1.5 shadow cursor-pointer">
           <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
           <span>Auto-Fill Clean Sample</span>
         </button>
-        <button id="fill-trap-btn" type="button" class="px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs transition-all flex items-center gap-1.5 shadow">
+        <button id="fill-trap-btn" type="button" class="px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs transition-all flex items-center gap-1.5 shadow cursor-pointer">
           <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i>
           <span>Auto-Fill Trap Sample</span>
         </button>
+        {% if edit_mode %}
+        <a href="/case/{{ next_case_id }}" class="px-4 py-2.5 rounded-xl bg-slate-700/70 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold text-xs transition-all flex items-center gap-1.5 shadow">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>Back to Case</span>
+        </a>
+        {% else %}
+        <button id="hero-clear-form-btn" type="button" class="px-4 py-2.5 rounded-xl bg-slate-700/70 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold text-xs transition-all flex items-center gap-1.5 shadow cursor-pointer">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>Clear Form</span>
+        </button>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -286,25 +297,8 @@
       </div>
     </div>
 
-    <!-- Submit Bar (Opens Consent & Authenticity Declaration Modal) -->
-    <div class="flex items-center justify-between gap-4 pt-2 pb-8">
-      {% if edit_mode %}
-      <a href="/case/{{ next_case_id }}" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-colors">
-        Cancel &amp; Back to Case
-      </a>
-      {% else %}
-      <button type="reset" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-colors">
-        Clear Form
-      </button>
-      {% endif %}
-      <button id="open-consent-btn" type="button" class="px-7 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition-all shadow-xl flex items-center gap-2 active:scale-95 cursor-pointer">
-        <i data-lucide="file-check-2" class="w-4 h-4"></i>
-        <span>Submit Form</span>
-      </button>
-    </div>
-
-    <!-- Applicant Consent & Document Authenticity Declaration Section (Inline Step 5 Card — No Dark Backdrop Overlay) -->
-    <div id="consent-modal" class="hidden pt-2 pb-10">
+    <!-- Step 5: Applicant Consent & Document Authenticity Declaration Section -->
+    <div id="consent-modal" class="pt-2 pb-10">
       <div class="relative w-full bg-white dark:bg-slate-900 border-2 border-amber-400/80 dark:border-amber-500/60 rounded-3xl shadow-xl overflow-hidden flex flex-col ring-4 ring-amber-500/10">
 
         <!-- Card Header (Bright Warm Solar Gradient) -->
@@ -322,9 +316,10 @@
               </h3>
             </div>
           </div>
-          <button id="close-consent-btn" type="button" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Collapse Consent Form">
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
+          <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-semibold">
+            <i data-lucide="file-check" class="w-3.5 h-3.5 text-amber-500"></i>
+            <span>Mandatory Before Submission</span>
+          </span>
         </div>
 
         <!-- Instruction Banner + Jump Down Arrow Button -->
@@ -412,9 +407,10 @@
 
         <!-- Card Footer with Locked/Unlocked Final Submission Button -->
         <div class="px-6 py-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-          <button id="cancel-consent-btn" type="button" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-colors cursor-pointer">
-            Hide Consent Form
-          </button>
+          <div class="text-[11px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+            <span>Scroll to bottom &amp; check the confirmation box above to unlock submission.</span>
+          </div>
 
           <button id="submit-new-case-btn" type="submit" disabled
             class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed cursor-pointer">
@@ -443,5 +439,5 @@
 <script>
   window.__INITIAL_PACK__ = {{ pack_json | safe }};
 </script>
-<script src="/static/new_case.js?v=6"></script>
+<script src="/static/new_case.js?v=7"></script>
 {% endblock %}

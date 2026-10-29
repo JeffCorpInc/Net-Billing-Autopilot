@@ -22,6 +22,7 @@
     const form = document.getElementById('new-case-form');
     const cleanBtn = document.getElementById('fill-clean-btn');
     const trapBtn = document.getElementById('fill-trap-btn');
+    const heroClearBtn = document.getElementById('hero-clear-form-btn');
     const fileInput = document.getElementById('f-file-upload');
     const openConsentBtn = document.getElementById('open-consent-btn');
     const closeConsentBtn = document.getElementById('close-consent-btn');
@@ -61,6 +62,21 @@
         window.NetBill.Toast.show('Trap Sample Loaded', 'Populated application with capacity & name mismatch violations.', 'info');
       }
     });
+
+    if (heroClearBtn && form) {
+      heroClearBtn.addEventListener('click', () => {
+        form.reset();
+        selectedFilesBuffer = [];
+        renderSelectedFiles();
+        hasScrolledToBottom = false;
+        if (consentCheckbox) consentCheckbox.checked = false;
+        if (consentScrollBody) consentScrollBody.scrollTop = 0;
+        updateConsentSubmitState();
+        if (window.NetBill?.Toast) {
+          window.NetBill.Toast.show('Form Cleared', 'All application fields and consent have been reset.', 'info');
+        }
+      });
+    }
 
     if (fileInput) {
       fileInput.addEventListener('change', (e) => {

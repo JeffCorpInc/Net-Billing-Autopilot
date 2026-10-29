@@ -85,12 +85,11 @@ def test_c09_capacity_exceeded(client):
 
 def test_create_and_delete_custom_case(client):
     """Verify creating a custom application pack via POST /api/cases, viewing it, and deleting it."""
-    # Check /new page renders with Submit Form trigger and Consent Modal
+    # Check /new page renders with Clear Form in hero and inline Consent Form
     page_res = client.get("/new")
     assert page_res.status_code == 200
     assert "Solar Net-Billing" in page_res.text
-    assert 'id="open-consent-btn"' in page_res.text
-    assert "Submit Form" in page_res.text
+    assert 'id="hero-clear-form-btn"' in page_res.text
     assert 'id="consent-modal"' in page_res.text
     assert 'id="consent-scroll-down-btn"' in page_res.text
     assert "Submit Application &amp; Run Compliance Checks" in page_res.text
