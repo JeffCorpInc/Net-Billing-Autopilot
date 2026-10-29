@@ -22,26 +22,6 @@
       this.caseId = root.getAttribute('data-case-id') || 'DRAFT';
       this.contextMode = root.getAttribute('data-context-mode') || 'form';
 
-      const form = document.getElementById('ai-assistant-form');
-
-      if (form) {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const input = document.getElementById('ai-assistant-input');
-          const msg = input?.value.trim();
-          if (!msg) return;
-          input.value = '';
-          this.sendPrompt(msg);
-        });
-      }
-
-      root.querySelectorAll('[data-ai-prompt]').forEach(chip => {
-        chip.addEventListener('click', () => {
-          const prompt = chip.getAttribute('data-ai-prompt');
-          if (prompt) this.sendPrompt(prompt);
-        });
-      });
-
       // If on the New/Edit form, attach blur/change listeners to update the live issue badge
       if (this.contextMode === 'form') {
         const appForm = document.getElementById('new-case-form');
@@ -91,6 +71,14 @@
       if (!panel) return;
       panel.style.display = 'none';
       this.isOpen = false;
+    },
+
+    submitInput() {
+      const input = document.getElementById('ai-assistant-input');
+      const msg = input?.value.trim();
+      if (!msg) return;
+      input.value = '';
+      this.sendPrompt(msg);
     },
 
     collectLiveDraftState() {
