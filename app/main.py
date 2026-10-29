@@ -221,6 +221,12 @@ async def case_page(request: Request, case_id: str):
         raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
 
     report = get_latest_report(case_id)
+    if not report:
+        from app.merge import build_case_report
+        from app.rules import run_code_rules
+        rule_results = run_code_rules(pack)
+        report = build_case_report(pack=pack, rule_results=rule_results)
+
     reviews = load_reviews()
     review = reviews.get(case_id)
     uploaded_files = list_uploaded_files(case_id)
@@ -270,6 +276,27 @@ async def health_check():
         "llm_configured": settings.is_llm_configured,
         "mode": settings.mode,
     }
+
+
+@app.get("/api/debug-cases")
+def debug_cases():
+    import traceback
+    from app.config import CASES_DIR, DATA_DIR, BASE_DIR
+    try:
+        from app.storage import list_case_summaries
+        cases = list_case_summaries()
+        return {
+            "cases_count": len(cases),
+            "cases_dir": str(CASES_DIR),
+            "cases_dir_exists": CASES_DIR.exists(),
+            "glob_count": len(list(CASES_DIR.glob("*.json"))) if CASES_DIR.exists() else 0,
+            "data_dir": str(DATA_DIR),
+            "data_dir_exists": DATA_DIR.exists(),
+            "base_dir": str(BASE_DIR),
+            "base_dir_files": [p.name for p in BASE_DIR.iterdir()] if BASE_DIR.exists() else [],
+        }
+    except Exception as e:
+        return {"error": str(e), "traceback": traceback.format_exc()}
 
 
 @app.get("/api/cases")
@@ -583,6 +610,12 @@ async def get_case_detail(case_id: str):
         raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
 
     report = get_latest_report(case_id)
+    if not report:
+        from app.merge import build_case_report
+        from app.rules import run_code_rules
+        rule_results = run_code_rules(pack)
+        report = build_case_report(pack=pack, rule_results=rule_results)
+
     reviews = load_reviews()
     review = reviews.get(case_id)
 

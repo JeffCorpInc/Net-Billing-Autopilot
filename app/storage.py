@@ -221,26 +221,16 @@ def list_case_summaries(include_custom: bool = True) -> list[CaseSummary]:
     """List all cases with summary statistics for the dashboard."""
     summaries = []
     reviews = load_reviews()
+    seen_ids = set()
 
-    # Custom user cases first (newest first), then C01 to C21 in order
-    case_files: list[Path] = []
+    # 1. Custom user cases (U*)
     if include_custom and CUSTOM_CASES_DIR.exists():
-        custom_files = sorted(CUSTOM_CASES_DIR.glob("U*.json"), key=lambda p: p.stem, reverse=True)
-        case_files.extend(custom_files)
-
-    builtin_files = sorted(CASES_DIR.glob("*.json"), key=lambda p: p.stem)
-    if builtin_files:
-        case_files.extend(builtin_files)
-    else:
-        # Fallback to pre-bundled cases if filesystem directory is unpopulated on serverless
-        try:
-            from app.bundled_cases import BUNDLED_CASES
-            for cid in sorted(BUNDLED_CASES.keys()):
-                pack = Pack.model_validate(BUNDLED_CASES[cid])
+        for path in sorted(CUSTOM_CASES_DIR.glob("U*.json"), key=lambda p: p.stem, reverse=True):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    pack = Pack.model_validate(json.load(f))
                 report = get_latest_report(pack.case_id)
-                is_reviewed = pack.case_id in reviews
-                overall = report.overall if report else "READY"
-                readiness = report.readiness_score if report else 100.0
+                seen_ids.add(pack.case_id)
                 summaries.append(
                     CaseSummary(
                         case_id=pack.case_id,
@@ -251,41 +241,68 @@ def list_case_summaries(include_custom: bool = True) -> list[CaseSummary]:
                         sanctioned_load_kw=pack.bill.sanctioned_load_kw,
                         docs_present_count=len(pack.docs_present),
                         docs_required_count=get_required_docs_count(pack),
-                        overall=overall,
-                        readiness=readiness,
-                        reviewed=is_reviewed,
+                        overall=report.overall if report else "READY",
+                        readiness=report.readiness_score if report else 100.0,
+                        reviewed=pack.case_id in reviews,
                     )
                 )
-        except Exception:
-            pass
+            except Exception:
+                continue
 
-    for path in case_files:
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                raw = json.load(f)
-            pack = Pack.model_validate(raw)
-            report = get_latest_report(pack.case_id)
-            is_reviewed = pack.case_id in reviews
+    # 2. Builtin benchmark cases (C01 to C21) from filesystem if present
+    try:
+        builtin_files = sorted(CASES_DIR.glob("*.json"), key=lambda p: p.stem)
+        for path in builtin_files:
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    pack = Pack.model_validate(json.load(f))
+                report = get_latest_report(pack.case_id)
+                seen_ids.add(pack.case_id)
+                summaries.append(
+                    CaseSummary(
+                        case_id=pack.case_id,
+                        category=pack.category,
+                        description=pack.description,
+                        applicant_name=pack.cnic.name,
+                        proposed_kw=pack.system.proposed_kw,
+                        sanctioned_load_kw=pack.bill.sanctioned_load_kw,
+                        docs_present_count=len(pack.docs_present),
+                        docs_required_count=get_required_docs_count(pack),
+                        overall=report.overall if report else "READY",
+                        readiness=report.readiness_score if report else 100.0,
+                        reviewed=pack.case_id in reviews,
+                    )
+                )
+            except Exception:
+                continue
+    except Exception:
+        pass
 
-            overall = report.overall if report else "PENDING"
-            readiness = report.readiness_score if report else 0.0
-
-            summary = CaseSummary(
-                case_id=pack.case_id,
-                category=pack.category,
-                description=pack.description,
-                applicant_name=pack.cnic.name,
-                proposed_kw=pack.system.proposed_kw,
-                sanctioned_load_kw=pack.bill.sanctioned_load_kw,
-                docs_present_count=len(pack.docs_present),
-                docs_required_count=get_required_docs_count(pack),
-                overall=overall,
-                readiness=readiness,
-                reviewed=is_reviewed,
-            )
-            summaries.append(summary)
-        except Exception:
-            continue
+    # 3. Guaranteed fallback: ensure all 21 benchmark cases are present from bundled data
+    try:
+        from app.bundled_cases import BUNDLED_CASES
+        for cid in sorted(BUNDLED_CASES.keys()):
+            if cid not in seen_ids:
+                pack = Pack.model_validate(BUNDLED_CASES[cid])
+                report = get_latest_report(cid)
+                seen_ids.add(cid)
+                summaries.append(
+                    CaseSummary(
+                        case_id=pack.case_id,
+                        category=pack.category,
+                        description=pack.description,
+                        applicant_name=pack.cnic.name,
+                        proposed_kw=pack.system.proposed_kw,
+                        sanctioned_load_kw=pack.bill.sanctioned_load_kw,
+                        docs_present_count=len(pack.docs_present),
+                        docs_required_count=get_required_docs_count(pack),
+                        overall=report.overall if report else "READY",
+                        readiness=report.readiness_score if report else 100.0,
+                        reviewed=cid in reviews,
+                    )
+                )
+    except Exception:
+        pass
 
     return summaries
 
