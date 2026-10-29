@@ -89,20 +89,23 @@ async def generic_exception_handler(request: Request, exc: Exception):
 # Page routes
 # ---------------------------------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
+@app.get("/admin", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
-    """Render dashboard page."""
+    """Render Admin Dashboard page."""
     context = get_base_context(request)
-    context.update({"active_page": "dashboard"})
+    context.update({"active_page": "dashboard", "portal_mode": False})
     return templates.TemplateResponse(request=request, name="dashboard.html", context=context)
 
 
+@app.get("/apply", response_class=HTMLResponse)
 @app.get("/new", response_class=HTMLResponse)
 async def new_case_page(request: Request):
-    """Render guided intake form for creating a new application pack."""
+    """Render standalone User Application Portal for creating a new application pack."""
     from app.storage import next_custom_case_id
     context = get_base_context(request)
     context.update({
         "active_page": "new_case",
+        "portal_mode": True,
         "next_case_id": next_custom_case_id(),
         "edit_mode": False,
         "pack_json": "null",
@@ -114,7 +117,7 @@ async def new_case_page(request: Request):
 @app.get("/case/{case_id}/edit", response_class=HTMLResponse)
 @app.get("/cases/{case_id}/edit", response_class=HTMLResponse)
 async def edit_case_page(request: Request, case_id: str):
-    """Render guided intake form in Edit Mode for an existing custom case."""
+    """Render standalone User Application Portal in Edit Mode for an existing custom case."""
     import json
     from app.storage import get_pack, list_uploaded_files
     if not case_id.upper().startswith("U"):
@@ -129,6 +132,7 @@ async def edit_case_page(request: Request, case_id: str):
     context = get_base_context(request)
     context.update({
         "active_page": "new_case",
+        "portal_mode": True,
         "next_case_id": pack.case_id,
         "edit_mode": True,
         "pack": pack,

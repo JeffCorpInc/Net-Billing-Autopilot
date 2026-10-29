@@ -88,7 +88,7 @@ def test_create_and_delete_custom_case(client):
     # Check /new page renders
     page_res = client.get("/new")
     assert page_res.status_code == 200
-    assert "Customer Onboarding Form" in page_res.text
+    assert "Solar Net-Billing" in page_res.text
 
     payload = {
         "description": "Unit test custom case",
@@ -150,10 +150,11 @@ def test_create_and_delete_custom_case(client):
         assert view_res.status_code == 200
         assert view_res.content == b"%PDF-1.4 fake scan bytes"
 
-        # Verify edit page renders pre-populated
+        # Verify edit page renders pre-populated in standalone portal mode
         edit_page_res = client.get(f"/case/{case_id}/edit")
         assert edit_page_res.status_code == 200
-        assert "Update Customer" in edit_page_res.text
+        assert "Net-Billing Application" in edit_page_res.text
+        assert 'id="app-sidebar"' not in edit_page_res.text
 
         # Verify PUT /api/cases/{case_id} updates the pack and re-runs checks
         payload["system"]["proposed_kw"] = 14.0  # Exceeds 10.0 kW sanctioned load -> NOT_READY
@@ -184,10 +185,18 @@ def test_create_and_delete_custom_case(client):
 
 def test_assistant_chat_endpoint_and_visibility(client):
     """Test AI Onboarding Assistant endpoint, PII scrubbing, and strict page visibility."""
-    # 1. Verify /new page includes the AI Assistant widget
-    new_page = client.get("/new")
-    assert new_page.status_code == 200
-    assert 'id="ai-assistant-root"' in new_page.text
+    # 1. Verify /apply and /new pages render standalone (no admin sidebar) and include the AI Assistant widget
+    for route in ("/apply", "/new"):
+        portal_page = client.get(route)
+        assert portal_page.status_code == 200
+        assert 'id="ai-assistant-root"' in portal_page.text
+        assert 'id="app-sidebar"' not in portal_page.text
+
+    # 1b. Verify Admin Dashboard (/) has the admin sidebar and does NOT have the New Application link
+    admin_page = client.get("/")
+    assert admin_page.status_code == 200
+    assert 'id="app-sidebar"' in admin_page.text
+    assert 'href="/new"' not in admin_page.text
 
     # 2. Verify built-in benchmark case /case/C01 does NOT include the AI Assistant widget
     c01_page = client.get("/case/C01")

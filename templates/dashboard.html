@@ -1,39 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard — NetBill Assist{% endblock %}
-{% block breadcrumb %}Dashboard{% endblock %}
-{% block page_title %}Onboarding Queue{% endblock %}
+{% block title %}Admin Dashboard — NetBill Assist{% endblock %}
+{% block breadcrumb %}Applications Queue{% endblock %}
+{% block page_title %}Net-Billing Compliance &amp; Review Dashboard{% endblock %}
 
 {% block content %}
 <div class="space-y-6 fade-slide-up">
 
-  <!-- Hero Section -->
-  <div class="bg-gradient-to-r from-[#0F172A] via-slate-900 to-slate-800 text-white rounded-2xl p-6 sm:p-7 shadow-xl border border-slate-800 relative overflow-hidden">
+  <!-- Prominent Admin Hero Section -->
+  <div class="bg-gradient-to-br from-[#0F172A] via-slate-900 to-slate-800 text-white rounded-3xl p-7 sm:p-9 shadow-2xl border border-slate-800 relative overflow-hidden">
+    <!-- Decorative Ambient Glow -->
+    <div class="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-amber-500/10 blur-3xl"></div>
+
     <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-      <div class="max-w-2xl">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-2">
+      <div class="max-w-2xl space-y-2">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
           <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>K-Electric Net-Billing Onboarding Queue · 2026</span>
+          <span>K-Electric Net-Billing Admin Console · NEPRA SRO 251(I)/2026</span>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Active Applications Queue</h2>
-        <p class="mt-1 text-xs sm:text-sm text-slate-300">
-          Review rooftop-solar document packs, verify compliance with DISCO rules, redact CNIC numbers, and assemble compliant draft filings.
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+          Active Applications <span class="text-amber-400">Review Queue</span>
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          Inspect submitted rooftop-solar document packs, verify deterministic rules (R1–R7) and cross-document AI checks (L1–L2), and issue compliant draft filings.
         </p>
       </div>
 
-      <!-- Action Button & Running Progress -->
+      <!-- Action Button & Running Progress (New Application button removed from Admin Dashboard) -->
       <div class="shrink-0 flex flex-col items-start md:items-end gap-2">
         <div class="flex flex-wrap items-center gap-2.5">
-          <a href="/new" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs transition-all shadow flex items-center gap-2 active:scale-95">
-            <i data-lucide="plus-circle" class="w-4 h-4 text-amber-400"></i>
-            <span>New Application</span>
-          </a>
-          <button id="run-all-btn" type="button" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all shadow-lg flex items-center gap-2 active:scale-95 disabled:opacity-50">
+          <button id="run-all-btn" type="button" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition-all shadow-xl flex items-center gap-2 active:scale-95 disabled:opacity-50">
             <i data-lucide="play-circle" class="w-4 h-4"></i>
-            <span>Run All Checks</span>
+            <span>Run All Compliance Checks</span>
           </button>
         </div>
-        <div id="run-all-progress-box" class="w-48 space-y-1 hidden">
+        <div id="run-all-progress-box" class="w-52 space-y-1 hidden">
           <div class="flex justify-between text-[11px] text-slate-300">
             <span id="run-all-progress-text">Checking C01…</span>
           </div>

@@ -1,38 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %}{% if edit_mode %}Edit Case {{ next_case_id }}{% else %}New Application{% endif %} — NetBill Assist{% endblock %}
-{% block breadcrumb %}{% if edit_mode %}Edit {{ next_case_id }}{% else %}New Application{% endif %}{% endblock %}
-{% block page_title %}{% if edit_mode %}Edit Application Pack ({{ next_case_id }}){% else %}Create New Net-Billing Application ({{ next_case_id }}){% endif %}{% endblock %}
+{% block title %}{% if edit_mode %}Edit Application {{ next_case_id }}{% else %}Solar Net-Billing Application Portal{% endif %} — NetBill Assist{% endblock %}
+{% block breadcrumb %}{% if edit_mode %}Edit {{ next_case_id }}{% else %}Application Form{% endif %}{% endblock %}
+{% block page_title %}{% if edit_mode %}Update Net-Billing Application ({{ next_case_id }}){% else %}K-Electric Solar Net-Billing Application Portal{% endif %}{% endblock %}
 
 {% block content %}
-<div class="space-y-6 fade-slide-up max-w-5xl mx-auto"
+<div class="space-y-7 fade-slide-up max-w-5xl mx-auto"
      id="new-case-root"
      data-edit-mode="{{ 'true' if edit_mode else 'false' }}"
      data-case-id="{{ next_case_id }}">
 
-  <!-- Header Banner + Sample Presets -->
-  <div class="bg-gradient-to-r from-[#0F172A] via-slate-900 to-slate-800 text-white rounded-2xl p-6 sm:p-7 shadow-xl border border-slate-800 relative overflow-hidden">
-    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-      <div class="max-w-2xl">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-2">
-          <i data-lucide="{% if edit_mode %}pencil{% else %}file-plus-2{% endif %}" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>{% if edit_mode %}Editing Custom Application Pack{% else %}Guided Application Intake{% endif %} · ID: <strong>{{ next_case_id }}</strong></span>
+  <!-- Prominent Customer Hero Banner + Sample Presets -->
+  <div class="bg-gradient-to-br from-[#0F172A] via-slate-900 to-slate-800 text-white rounded-3xl p-7 sm:p-9 shadow-2xl border border-slate-800 relative overflow-hidden">
+    <!-- Ambient Decorative Glow -->
+    <div class="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-amber-500/15 blur-3xl"></div>
+
+    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div class="max-w-2xl space-y-2.5">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+          <i data-lucide="{% if edit_mode %}pencil{% else %}sun{% endif %}" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>{% if edit_mode %}Updating Application Pack{% else %}Customer Self-Service Application{% endif %} · Tracking ID: <strong>{{ next_case_id }}</strong></span>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
-          {% if edit_mode %}Update Customer &amp; Document Details{% else %}Customer Onboarding Form{% endif %}
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+          {% if edit_mode %}
+            Update Your <span class="text-amber-400">Net-Billing Application</span>
+          {% else %}
+            Submit Your <span class="text-amber-400">Solar Net-Billing</span> Application
+          {% endif %}
         </h2>
-        <p class="mt-1 text-xs sm:text-sm text-slate-300">
-          Enter or update customer CNIC, K-Electric bill, property deed, solar system details, and supporting scans. CNIC and 13-digit bill references are automatically redacted before any LLM check executes.
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          Complete the 4 steps below using your NADRA CNIC, latest K-Electric bill, property ownership deed, and solar system specifications. Click the circular <strong>AI Copilot</strong> button at the bottom-right anytime to check your entries for mistakes or mismatches.
         </p>
       </div>
 
       <!-- Quick Sample Fillers -->
-      <div class="shrink-0 flex flex-wrap items-center gap-2">
-        <button id="fill-clean-btn" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-semibold text-xs transition-all flex items-center gap-1.5">
+      <div class="shrink-0 flex flex-wrap items-center gap-2.5">
+        <button id="fill-clean-btn" type="button" class="px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs transition-all flex items-center gap-1.5 shadow">
           <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
           <span>Auto-Fill Clean Sample</span>
         </button>
-        <button id="fill-trap-btn" type="button" class="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-semibold text-xs transition-all flex items-center gap-1.5">
+        <button id="fill-trap-btn" type="button" class="px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs transition-all flex items-center gap-1.5 shadow">
           <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i>
           <span>Auto-Fill Trap Sample</span>
         </button>
@@ -281,14 +288,20 @@
 
     <!-- Submit Bar -->
     <div class="flex items-center justify-between gap-4 pt-2 pb-8">
-      <a href="{% if edit_mode %}/case/{{ next_case_id }}{% else %}/{% endif %}" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-colors">
-        Cancel
+      {% if edit_mode %}
+      <a href="/case/{{ next_case_id }}" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-colors">
+        Cancel &amp; Back to Case
       </a>
-      <button id="submit-new-case-btn" type="submit" class="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition-all shadow-lg flex items-center gap-2 active:scale-95">
+      {% else %}
+      <button type="reset" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-colors">
+        Clear Form
+      </button>
+      {% endif %}
+      <button id="submit-new-case-btn" type="submit" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition-all shadow-xl flex items-center gap-2 active:scale-95">
         <span id="submit-spinner" class="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin hidden"></span>
         <i data-lucide="shield-check" class="w-4 h-4"></i>
         <span id="submit-btn-text">
-          {% if edit_mode %}Save Changes &amp; Re-Run Compliance Checks{% else %}Create Application &amp; Run Compliance Checks{% endif %}
+          {% if edit_mode %}Save Changes &amp; Re-Run Compliance Checks{% else %}Submit Application &amp; Run Compliance Checks{% endif %}
         </span>
       </button>
     </div>
