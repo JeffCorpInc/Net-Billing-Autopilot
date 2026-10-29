@@ -1,0 +1,66 @@
+{
+  "case_id": "C06",
+  "category": "clean",
+  "applicant_name": "Farhan Akhtar",
+  "runs": 1,
+  "overall_expected": "READY",
+  "overall_got": "READY",
+  "overall_match": true,
+  "readiness_score": 100.0,
+  "checks": {
+    "cnic_format": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "CNIC format is valid (42101-1000185-1)"
+    },
+    "cnic_expiry": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "CNIC is valid until 2030-10-27 (1460 days remaining)"
+    },
+    "capacity": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Proposed 8.0 kW is within the sanctioned load of 10.0 kW"
+    },
+    "connection_phase": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "3-phase connection verified"
+    },
+    "connected_load": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Connected load (10.0 kW) does not exceed sanctioned load (10.0 kW)"
+    },
+    "required_docs": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "All 9 required documents are present in pack"
+    },
+    "name_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "The CNIC name and bill consumer name are identical."
+    },
+    "address_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Fuzzy score 100.0% calculated via normalized address token comparison."
+    }
+  },
+  "runs_consistent": true,
+  "avg_latency_ms": 3074.5,
+  "gate_passed": true,
+  "wrong_pdf_values": 0,
+  "pdf_discrepancies": [],
+  "shadow_checks": []
+}

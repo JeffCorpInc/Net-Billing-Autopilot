@@ -1,0 +1,83 @@
+{
+  "case_id": "C18",
+  "category": "trap",
+  "applicant_name": "Babar Azam",
+  "runs": 1,
+  "overall_expected": "NOT_READY",
+  "overall_got": "NOT_READY",
+  "overall_match": true,
+  "readiness_score": 75.0,
+  "checks": {
+    "cnic_format": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "CNIC format is valid (42101-1000629-1)"
+    },
+    "cnic_expiry": {
+      "expected": "FAIL",
+      "got": "FAIL",
+      "match": true,
+      "detail": "CNIC expired on 2026-09-15 (45 days ago). Valid unexpired CNIC required."
+    },
+    "capacity": {
+      "expected": "FAIL",
+      "got": "FAIL",
+      "match": true,
+      "detail": "Proposed 14.0 kW exceeds the sanctioned load of 10.0 kW"
+    },
+    "connection_phase": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "3-phase connection verified"
+    },
+    "connected_load": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Connected load (10.0 kW) does not exceed sanctioned load (10.0 kW)"
+    },
+    "required_docs": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "All 8 required documents are present in pack"
+    },
+    "name_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Names refer to the same individual accounting for standard Pakistani spelling variants or abbreviations."
+    },
+    "address_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Addresses refer to the same premises with standard abbreviation variations (H#, Blk, Khi)."
+    }
+  },
+  "runs_consistent": true,
+  "avg_latency_ms": 20.0,
+  "gate_passed": true,
+  "wrong_pdf_values": 0,
+  "pdf_discrepancies": [],
+  "shadow_checks": [
+    {
+      "check": "R2 (CNIC Expiry)",
+      "code_verdict": true,
+      "llm_verdict": false,
+      "agree": false,
+      "note": "Disagreement",
+      "reasoning": "Mock LLM mistakenly judged 14 kW acceptable for sanctioned load."
+    },
+    {
+      "check": "R3 (Capacity Limit)",
+      "code_verdict": false,
+      "llm_verdict": true,
+      "agree": false,
+      "note": "LLM said capacity OK, code found 14.0 kW > 10.0 kW → code decides",
+      "reasoning": "Mock LLM mistakenly judged 14 kW acceptable for sanctioned load."
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "case_id": "C09",
-  "timestamp": "2026-10-29T19:24:32.942130+00:00",
+  "timestamp": "2026-10-29T19:36:39.317550+00:00",
   "mode": "mock",
   "overall": "NOT_READY",
   "readiness_score": 87.5,
@@ -165,7 +165,7 @@
           "cnic_address: 'Plot 220, Sector 31-D, Korangi Industrial Area, Karachi' vs bill_address: 'Plot 220, Sector 31-D, Korangi Industrial Area, Karachi'"
         ],
         "fuzzy_score": 100.0,
-        "latency_ms": 22,
+        "latency_ms": 20,
         "model": "mock-engine",
         "provider": "mock"
       }

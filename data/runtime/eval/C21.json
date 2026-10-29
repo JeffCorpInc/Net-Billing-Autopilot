@@ -1,0 +1,83 @@
+{
+  "case_id": "C21",
+  "category": "trap",
+  "applicant_name": "Naseem Shah",
+  "runs": 1,
+  "overall_expected": "NOT_READY",
+  "overall_got": "NOT_READY",
+  "overall_match": true,
+  "readiness_score": 87.5,
+  "checks": {
+    "cnic_format": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "CNIC format is valid (42101-1000740-1)"
+    },
+    "cnic_expiry": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "CNIC is valid until 2030-10-27 (1460 days remaining)"
+    },
+    "capacity": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Proposed 8.0 kW is within the sanctioned load of 10.0 kW"
+    },
+    "connection_phase": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "3-phase connection verified"
+    },
+    "connected_load": {
+      "expected": "FAIL",
+      "got": "FAIL",
+      "match": true,
+      "detail": "Connected load (12.0 kW) exceeds sanctioned load (10.0 kW). Regularise the connected load with K-Electric before applying."
+    },
+    "required_docs": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "All 8 required documents are present in pack"
+    },
+    "name_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "The names on the CNIC and utility bill match exactly."
+    },
+    "address_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "The addresses are identical across all documents."
+    }
+  },
+  "runs_consistent": true,
+  "avg_latency_ms": 2260.5,
+  "gate_passed": true,
+  "wrong_pdf_values": 0,
+  "pdf_discrepancies": [],
+  "shadow_checks": [
+    {
+      "check": "R2 (CNIC Expiry)",
+      "code_verdict": true,
+      "llm_verdict": true,
+      "agree": true,
+      "note": "Agreed",
+      "reasoning": "The CNIC expiry date is valid as it is after today's date, and the proposed KW does not exceed the sanctioned load."
+    },
+    {
+      "check": "R3 (Capacity Limit)",
+      "code_verdict": true,
+      "llm_verdict": true,
+      "agree": true,
+      "note": "Agreed",
+      "reasoning": "The CNIC expiry date is valid as it is after today's date, and the proposed KW does not exceed the sanctioned load."
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "case_id": "C15",
+  "category": "trap",
+  "applicant_name": "Kamran Akram",
+  "runs": 1,
+  "overall_expected": "NOT_READY",
+  "overall_got": "NOT_READY",
+  "overall_match": true,
+  "readiness_score": 87.5,
+  "checks": {
+    "cnic_format": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "CNIC format is valid (42101-1000518-1)"
+    },
+    "cnic_expiry": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "CNIC is valid until 2030-10-27 (1460 days remaining)"
+    },
+    "capacity": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Proposed 8.0 kW is within the sanctioned load of 10.0 kW"
+    },
+    "connection_phase": {
+      "expected": "FAIL",
+      "got": "FAIL",
+      "match": true,
+      "detail": "Ineligible connection type: '1-phase'. 3-phase connection is strictly required under NEPRA regulations."
+    },
+    "connected_load": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Connected load (10.0 kW) does not exceed sanctioned load (10.0 kW)"
+    },
+    "required_docs": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "All 8 required documents are present in pack"
+    },
+    "name_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "The names on the CNIC and the bill are an exact match."
+    },
+    "address_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "All addresses match identically in house number, street, and area."
+    }
+  },
+  "runs_consistent": true,
+  "avg_latency_ms": 2401.5,
+  "gate_passed": true,
+  "wrong_pdf_values": 0,
+  "pdf_discrepancies": [],
+  "shadow_checks": [
+    {
+      "check": "R2 (CNIC Expiry)",
+      "code_verdict": true,
+      "llm_verdict": true,
+      "agree": true,
+      "note": "Agreed",
+      "reasoning": "The CNIC is valid as the expiry date is in the future relative to today, and the proposed capacity of 8.0 kW does not exceed the sanctioned load of 10.0 kW."
+    },
+    {
+      "check": "R3 (Capacity Limit)",
+      "code_verdict": true,
+      "llm_verdict": true,
+      "agree": true,
+      "note": "Agreed",
+      "reasoning": "The CNIC is valid as the expiry date is in the future relative to today, and the proposed capacity of 8.0 kW does not exceed the sanctioned load of 10.0 kW."
+    }
+  ]
+}

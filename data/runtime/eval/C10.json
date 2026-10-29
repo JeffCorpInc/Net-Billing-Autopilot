@@ -1,0 +1,83 @@
+{
+  "case_id": "C10",
+  "category": "trap",
+  "applicant_name": "Imran Ashraf",
+  "runs": 1,
+  "overall_expected": "NOT_READY",
+  "overall_got": "NOT_READY",
+  "overall_match": true,
+  "readiness_score": 87.5,
+  "checks": {
+    "cnic_format": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "CNIC format is valid (42101-1000333-1)"
+    },
+    "cnic_expiry": {
+      "expected": "FAIL",
+      "got": "FAIL",
+      "match": true,
+      "detail": "CNIC expired on 2026-08-14 (75 days ago). Valid unexpired CNIC required."
+    },
+    "capacity": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Proposed 8.0 kW is within the sanctioned load of 10.0 kW"
+    },
+    "connection_phase": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "3-phase connection verified"
+    },
+    "connected_load": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Connected load (10.0 kW) does not exceed sanctioned load (10.0 kW)"
+    },
+    "required_docs": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "All 8 required documents are present in pack"
+    },
+    "name_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "The names on the CNIC and the bill consumer name are identical."
+    },
+    "address_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "All addresses are completely identical."
+    }
+  },
+  "runs_consistent": true,
+  "avg_latency_ms": 2119.0,
+  "gate_passed": true,
+  "wrong_pdf_values": 0,
+  "pdf_discrepancies": [],
+  "shadow_checks": [
+    {
+      "check": "R2 (CNIC Expiry)",
+      "code_verdict": true,
+      "llm_verdict": false,
+      "agree": false,
+      "note": "Disagreement",
+      "reasoning": "The CNIC is expired since the today date is past the expiry date, and the proposed KW is within the sanctioned load limit."
+    },
+    {
+      "check": "R3 (Capacity Limit)",
+      "code_verdict": true,
+      "llm_verdict": true,
+      "agree": true,
+      "note": "Agreed",
+      "reasoning": "The CNIC is expired since the today date is past the expiry date, and the proposed KW is within the sanctioned load limit."
+    }
+  ]
+}

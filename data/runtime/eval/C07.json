@@ -1,0 +1,83 @@
+{
+  "case_id": "C07",
+  "category": "clean",
+  "applicant_name": "Tariq Mahmood",
+  "runs": 1,
+  "overall_expected": "READY",
+  "overall_got": "READY",
+  "overall_match": true,
+  "readiness_score": 100.0,
+  "checks": {
+    "cnic_format": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "CNIC format is valid (42101-1000222-1)"
+    },
+    "cnic_expiry": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "CNIC is valid until 2030-10-27 (1460 days remaining)"
+    },
+    "capacity": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Proposed 10.0 kW is within the sanctioned load of 15.0 kW"
+    },
+    "connection_phase": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "3-phase connection verified"
+    },
+    "connected_load": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Connected load (15.0 kW) does not exceed sanctioned load (15.0 kW)"
+    },
+    "required_docs": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "All 8 required documents are present in pack"
+    },
+    "name_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Fuzzy score 100.0% calculated via normalized token comparison."
+    },
+    "address_match": {
+      "expected": "PASS",
+      "got": "PASS",
+      "match": true,
+      "detail": "Fuzzy score 100.0% calculated via normalized address token comparison."
+    }
+  },
+  "runs_consistent": true,
+  "avg_latency_ms": 3498.0,
+  "gate_passed": true,
+  "wrong_pdf_values": 0,
+  "pdf_discrepancies": [],
+  "shadow_checks": [
+    {
+      "check": "R2 (CNIC Expiry)",
+      "code_verdict": true,
+      "llm_verdict": true,
+      "agree": true,
+      "note": "Agreed",
+      "reasoning": "The CNIC expiry date is after today, and the proposed capacity is less than or equal to the sanctioned load."
+    },
+    {
+      "check": "R3 (Capacity Limit)",
+      "code_verdict": true,
+      "llm_verdict": true,
+      "agree": true,
+      "note": "Agreed",
+      "reasoning": "The CNIC expiry date is after today, and the proposed capacity is less than or equal to the sanctioned load."
+    }
+  ]
+}
