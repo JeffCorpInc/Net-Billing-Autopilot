@@ -1,6 +1,6 @@
 {
   "case_id": "C01",
-  "timestamp": "2026-10-29T19:40:22.349597+00:00",
+  "timestamp": "2026-10-29T20:12:39.320746+00:00",
   "mode": "mock",
   "overall": "READY",
   "readiness_score": 100.0,
@@ -138,7 +138,7 @@
           "cnic_name: 'Muhammad Usman' vs bill_consumer_name: 'Muhammad Usman'"
         ],
         "fuzzy_score": 100.0,
-        "latency_ms": 20,
+        "latency_ms": 21,
         "model": "mock-engine",
         "provider": "mock"
       }

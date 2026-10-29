@@ -91,9 +91,17 @@ load_dotenv(BASE_DIR / ".env")
 class Settings(BaseModel):
     """Runtime application settings."""
 
-    llm_provider: str = Field(default_factory=lambda: os.getenv("LLM_PROVIDER", "mock"))
-    llm_model: str = Field(default_factory=lambda: os.getenv("LLM_MODEL", ""))
-    llm_api_key: str = Field(default_factory=lambda: os.getenv("LLM_API_KEY", ""))
+    llm_provider: str = Field(
+        default_factory=lambda: os.getenv("LLM_PROVIDER") or "gemini"
+    )
+    llm_model: str = Field(
+        default_factory=lambda: os.getenv("LLM_MODEL") or "gemini-flash-lite-latest"
+    )
+    llm_api_key: str = Field(
+        default_factory=lambda: os.getenv("LLM_API_KEY")
+        or os.getenv("GEMINI_API_KEY")
+        or ""
+    )
     llm_base_url: str = Field(default_factory=lambda: os.getenv("LLM_BASE_URL", ""))
     llm_timeout_seconds: float = Field(
         default_factory=lambda: float(os.getenv("LLM_TIMEOUT_SECONDS", "30.0"))

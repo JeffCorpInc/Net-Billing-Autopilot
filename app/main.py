@@ -30,6 +30,52 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
+class VercelPathFixMiddleware:
+    """ASGI middleware to resolve original request paths when deployed behind Vercel rewrites."""
+
+    def __init__(self, asgi_app):
+        self.asgi_app = asgi_app
+
+    async def __call__(self, scope, receive, send):
+        if scope.get("type") == "http":
+            headers_dict = dict(scope.get("headers", []))
+            matched_path = None
+            for hname in (
+                b"x-matched-path",
+                b"x-original-uri",
+                b"x-real-path",
+                b"x-forwarded-uri",
+                b"x-vercel-matched-path",
+            ):
+                raw_val = headers_dict.get(hname)
+                if raw_val:
+                    val = raw_val.decode("utf-8", errors="ignore").split("?")[0]
+                    if val and val not in ("/api/index", "/api/index.py", "/api"):
+                        matched_path = val
+                        break
+
+            path = scope.get("path", "")
+            if matched_path:
+                scope["path"] = matched_path
+                scope["raw_path"] = matched_path.encode("utf-8")
+            elif path.startswith("/api/index/"):
+                sub = path[len("/api/index"):]
+                scope["path"] = sub
+                scope["raw_path"] = sub.encode("utf-8")
+            elif path.startswith("/api/index.py/"):
+                sub = path[len("/api/index.py"):]
+                scope["path"] = sub
+                scope["raw_path"] = sub.encode("utf-8")
+            elif path in ("/api/index", "/api/index.py"):
+                scope["path"] = "/"
+                scope["raw_path"] = b"/"
+
+        await self.asgi_app(scope, receive, send)
+
+
+app.add_middleware(VercelPathFixMiddleware)
 # Directories
 STATIC_DIR = BASE_DIR / "static"
 TEMPLATES_DIR = BASE_DIR / "templates"
@@ -90,6 +136,13 @@ async def generic_exception_handler(request: Request, exc: Exception):
 # ---------------------------------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
 @app.get("/admin", response_class=HTMLResponse)
+
+@app.get("/api/index", include_in_schema=False)
+@app.get("/api/index.py", include_in_schema=False)
+async def vercel_index_alias(request: Request):
+    """Fallback alias for Vercel default function invocation without rewrites."""
+    return await dashboard_page(request)
+
 async def dashboard_page(request: Request):
     """Render Admin Dashboard page."""
     context = get_base_context(request)
