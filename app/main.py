@@ -242,11 +242,12 @@ async def create_new_case(request: Request):
         raise HTTPException(status_code=422, detail=f"Validation error: {exc}")
 
     # Run deterministic rules first so we can auto-classify category ("clean" vs "trap")
+    from fastapi.concurrency import run_in_threadpool
     rule_results = run_code_rules(pack)
-    l1_res = run_l1_name_check(pack)
-    l2_res = run_l2_address_check(pack)
+    l1_res = await run_in_threadpool(run_l1_name_check, pack)
+    l2_res = await run_in_threadpool(run_l2_address_check, pack)
     llm_results = [l1_res, l2_res]
-    shadow_checks = run_shadow_checks(pack)
+    shadow_checks = await run_in_threadpool(run_shadow_checks, pack)
 
     any_fail = any(r.status == "FAIL" for r in (rule_results + llm_results))
     pack.category = "trap" if any_fail else "clean"
@@ -314,11 +315,12 @@ async def update_existing_case(case_id: str, request: Request):
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Validation error: {exc}")
 
+    from fastapi.concurrency import run_in_threadpool
     rule_results = run_code_rules(pack)
-    l1_res = run_l1_name_check(pack)
-    l2_res = run_l2_address_check(pack)
+    l1_res = await run_in_threadpool(run_l1_name_check, pack)
+    l2_res = await run_in_threadpool(run_l2_address_check, pack)
     llm_results = [l1_res, l2_res]
-    shadow_checks = run_shadow_checks(pack)
+    shadow_checks = await run_in_threadpool(run_shadow_checks, pack)
 
     any_fail = any(r.status == "FAIL" for r in (rule_results + llm_results))
     pack.category = "trap" if any_fail else "clean"
@@ -442,6 +444,7 @@ async def delete_case_endpoint(case_id: str):
 @app.post("/api/assistant/chat")
 async def assistant_chat_endpoint(request: Request):
     """AI Onboarding Copilot endpoint for live form validation & custom user case Q&A."""
+    from fastapi.concurrency import run_in_threadpool
     from app.assistant import run_assistant_chat
     from app.storage import get_pack
 
@@ -453,6 +456,7 @@ async def assistant_chat_endpoint(request: Request):
     case_id = str(body.get("case_id") or "DRAFT").strip()
     user_message = str(body.get("message") or "").strip()
     draft_state = body.get("draft_state")
+    inspect_only = bool(body.get("inspect_only", False))
 
     # Block benchmark cases C01..C21 from using the custom user assistant
     if case_id.upper().startswith("C") and case_id[1:].isdigit():
@@ -468,10 +472,12 @@ async def assistant_chat_endpoint(request: Request):
             raise HTTPException(status_code=404, detail=f"Custom case {case_id} not found")
         draft_state = pack.model_dump()
 
-    result = run_assistant_chat(
+    result = await run_in_threadpool(
+        run_assistant_chat,
         case_id=case_id,
         draft_state=draft_state,
         user_message=user_message,
+        inspect_only=inspect_only,
     )
     return result
 
@@ -496,7 +502,7 @@ async def get_case_detail(case_id: str):
 
 
 @app.post("/api/check/{case_id}")
-async def run_checks(case_id: str, use_llm: bool = True):
+def run_checks(case_id: str, use_llm: bool = True):
     """Run compliance checks (R1-R7 deterministic + L1/L2 and shadow if use_llm=true) on a case."""
     from app.llm_checks import run_l1_name_check, run_l2_address_check, run_shadow_checks
     from app.merge import build_case_report
@@ -528,7 +534,7 @@ async def run_checks(case_id: str, use_llm: bool = True):
 
 
 @app.post("/api/checklist/{case_id}")
-async def get_checklist(case_id: str, lang: str = "en"):
+def get_checklist(case_id: str, lang: str = "en"):
     """Generate bilingual customer checklist with faithfulness gate protection."""
     from app.audit import log_audit_event
     from app.checklist import generate_customer_checklist
@@ -651,7 +657,7 @@ async def get_audit_trail_endpoint(case_id: str):
 
 
 @app.post("/api/evaluate/case/{case_id}")
-async def evaluate_case_endpoint(case_id: str, runs: int = 1):
+def evaluate_case_endpoint(case_id: str, runs: int = 1):
     """Evaluate one case against ground truth and store result in data/runtime/eval/."""
     from app.evaluate import evaluate_single_case
     try:
@@ -664,7 +670,7 @@ async def evaluate_case_endpoint(case_id: str, runs: int = 1):
 
 
 @app.get("/api/evaluate/summary")
-async def evaluate_summary_endpoint():
+def evaluate_summary_endpoint():
     """Retrieve aggregated metrics from stored evaluation results."""
     from app.evaluate import compute_summary_metrics, load_all_eval_results
     evals = load_all_eval_results()

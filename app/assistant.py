@@ -272,9 +272,23 @@ def run_assistant_chat(
     case_id: str,
     draft_state: dict[str, Any],
     user_message: str = "",
+    inspect_only: bool = False,
 ) -> dict[str, Any]:
     """Inspect draft/case state, scrub all PII, query LLM (or fallback), and return structured guidance."""
     diagnostics = inspect_draft_state(draft_state)
+
+    if inspect_only:
+        fallback = _build_deterministic_reply(diagnostics, user_message)
+        return {
+            "reply": fallback["reply"],
+            "next_steps": fallback["next_steps"],
+            "issues": diagnostics["detected_issues"],
+            "missing_fields": diagnostics["missing_fields"],
+            "issue_count": len(diagnostics["detected_issues"]) + len(diagnostics["missing_fields"]),
+            "source": "instant-inspector",
+            "model": "deterministic",
+            "latency_ms": 1,
+        }
 
     # Scrub sensitive CNIC / 13-digit reference numbers from both diagnostics and user message
     redacted_payload = sanitize_dict({
@@ -325,13 +339,34 @@ def _build_deterministic_reply(diagnostics: dict[str, Any], user_message: str) -
     """Build a clear, rule-accurate response if the external LLM is offline."""
     issues = diagnostics["detected_issues"]
     missing = diagnostics["missing_fields"]
+    q_low = (user_message or "").lower()
+
+    # Answer specific regulatory questions directly if asked
+    extra_note = ""
+    if "document" in q_low or "attach" in q_low or "noc" in q_low:
+        is_tenant = diagnostics.get("summary", {}).get("is_tenant", False)
+        extra_note = (
+            "\n\n**Required Documents (NEPRA Reg. 4(2) & KE Guidelines):** "
+            "1) CNIC copy, 2) Latest K-Electric bill, 3) Proof of ownership (Sale Deed/Allotment), "
+            "4) Single-line diagram (SLD), 5) Schedule-V Affidavit, 6) Vendor checklist, "
+            "7) Inverter data sheet, 8) Inverter settings letter"
+            + (", and **9) Owner's NOC** (mandatory for tenant applicants)." if is_tenant else " (plus Owner's NOC if applicant is a tenant).")
+        )
+    elif "capacity" in q_low or "load" in q_low or "kw" in q_low or "phase" in q_low:
+        extra_note = (
+            "\n\n**Capacity & Connection Rules (NEPRA Reg. 3(2) & 9(1)):** "
+            "• Connection must be **3-phase** (1-phase is ineligible).\n"
+            "• **Proposed Solar (kW) ≤ Sanctioned Load (kW)**.\n"
+            "• **Connected Load (kW) ≤ Sanctioned Load (kW)**.\n"
+            "• **Inverter Rating (kW) ≥ Proposed Solar (kW)**."
+        )
 
     if not issues and not missing:
         return {
             "reply": (
                 "All entered fields and documents look **100% compliant** with NEPRA (Prosumer) Regulations 2026 "
                 "and K-Electric Net-Billing Guidelines! Your CNIC format/expiry, 3-phase supply, system size, "
-                "and cross-document names/addresses all pass."
+                "and cross-document names/addresses all pass." + extra_note
             ),
             "next_steps": ["Click Save / Create Application to generate the compliant Draft PDF."],
         }
@@ -347,7 +382,11 @@ def _build_deterministic_reply(diagnostics: dict[str, Any], user_message: str) -
         for idx, iss in enumerate(issues, 1):
             parts.append(f"{idx}. **[{iss['rule_id']}] {iss['title']}:** {iss['message']}\n   ↳ *How to fix:* {iss['fix']}")
 
+    if extra_note:
+        parts.append(extra_note.strip())
+
     return {
         "reply": "\n\n".join(parts),
-        "next_steps": [iss["fix"] for iss in issues[:3]],
+        "next_steps": [iss["fix"] for iss in issues[:3]] or ["Fill in the remaining form fields and click Check Now."],
     }
+

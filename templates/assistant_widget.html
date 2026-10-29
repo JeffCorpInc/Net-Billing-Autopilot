@@ -241,6 +241,7 @@
             case_id: this.caseId,
             message: 'Quick status check',
             draft_state: this.collectLiveDraftState(),
+            inspect_only: true,
           }),
         });
         if (!res.ok) return;
