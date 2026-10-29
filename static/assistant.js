@@ -16,19 +16,13 @@
 
     init() {
       const root = document.getElementById('ai-assistant-root');
-      if (!root) return;
+      if (!root || root.getAttribute('data-initialized') === 'true') return;
+      root.setAttribute('data-initialized', 'true');
 
       this.caseId = root.getAttribute('data-case-id') || 'DRAFT';
       this.contextMode = root.getAttribute('data-context-mode') || 'form';
 
-      const toggleBtn = document.getElementById('ai-assistant-toggle-btn');
-      const closeBtn = document.getElementById('ai-assistant-close-btn');
-      const scanBtn = document.getElementById('ai-assistant-scan-btn');
       const form = document.getElementById('ai-assistant-form');
-
-      if (toggleBtn) toggleBtn.addEventListener('click', () => this.togglePanel());
-      if (closeBtn) closeBtn.addEventListener('click', () => this.closePanel());
-      if (scanBtn) scanBtn.addEventListener('click', () => this.sendPrompt('Check my current entries and tell me what is wrong or mismatched.'));
 
       if (form) {
         form.addEventListener('submit', (e) => {
@@ -319,10 +313,12 @@
     }
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
-    AssistantCopilot.init();
-  });
-
   window.AssistantCopilot = AssistantCopilot;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => AssistantCopilot.init());
+  } else {
+    AssistantCopilot.init();
+  }
 })();
 
