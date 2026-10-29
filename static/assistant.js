@@ -22,31 +22,14 @@
       this.caseId = root.getAttribute('data-case-id') || 'DRAFT';
       this.contextMode = root.getAttribute('data-context-mode') || 'form';
 
-      // If on the New/Edit form, attach blur/change listeners to update the live issue badge
-      if (this.contextMode === 'form') {
-        const appForm = document.getElementById('new-case-form');
-        if (appForm) {
-          let debounceTimer = null;
-          appForm.addEventListener('change', () => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => this.silentBackgroundCheck(), 600);
-          });
-        }
-        // Hook into sample preset buttons if clicked
-        ['fill-clean-btn', 'fill-trap-btn'].forEach(btnId => {
-          const b = document.getElementById(btnId);
-          if (b) {
-            b.addEventListener('click', () => {
-              setTimeout(() => {
-                this.openPanel();
-                this.sendPrompt('Analyze the fields I just entered and tell me if there are any wrong entries or mismatches.');
-              }, 250);
-            });
-          }
+      // On-demand only: Do not automatically pop open or auto-fire background queries
+      // when typing or loading sample data. All checks run only when explicitly commanded by user.
+      const heroCheckBtn = document.getElementById('hero-ai-check-btn');
+      if (heroCheckBtn) {
+        heroCheckBtn.addEventListener('click', () => {
+          this.openPanel();
+          this.sendPrompt('Analyze the current form entries and highlight any errors or regulatory mismatches.');
         });
-      } else {
-        // On a custom user case page (/case/U01), do an initial silent check to populate the issue badge
-        setTimeout(() => this.silentBackgroundCheck(), 400);
       }
     },
 

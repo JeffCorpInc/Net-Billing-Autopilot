@@ -521,10 +521,7 @@
         );
       }
 
-      // Trigger AI Copilot background inspection on the newly OCR-populated fields
-      if (window.AssistantCopilot?.silentBackgroundCheck) {
-        window.AssistantCopilot.silentBackgroundCheck();
-      }
+      // OCR population completed. AI checks remain on-demand only (not auto-triggered).
     } catch (err) {
       if (banner) {
         banner.className = 'p-3 rounded-xl border border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-semibold';

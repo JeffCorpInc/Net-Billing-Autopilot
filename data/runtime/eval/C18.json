@@ -58,7 +58,7 @@
     }
   },
   "runs_consistent": true,
-  "avg_latency_ms": 20.5,
+  "avg_latency_ms": 20.0,
   "gate_passed": true,
   "wrong_pdf_values": 0,
   "pdf_discrepancies": [],
