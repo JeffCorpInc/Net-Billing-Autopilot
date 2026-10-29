@@ -280,23 +280,40 @@ async def health_check():
 
 @app.get("/api/debug-cases")
 def debug_cases():
-    import traceback
+    import traceback, json
     from app.config import CASES_DIR, DATA_DIR, BASE_DIR
-    try:
-        from app.storage import list_case_summaries
-        cases = list_case_summaries()
-        return {
-            "cases_count": len(cases),
-            "cases_dir": str(CASES_DIR),
-            "cases_dir_exists": CASES_DIR.exists(),
-            "glob_count": len(list(CASES_DIR.glob("*.json"))) if CASES_DIR.exists() else 0,
-            "data_dir": str(DATA_DIR),
-            "data_dir_exists": DATA_DIR.exists(),
-            "base_dir": str(BASE_DIR),
-            "base_dir_files": [p.name for p in BASE_DIR.iterdir()] if BASE_DIR.exists() else [],
-        }
-    except Exception as e:
-        return {"error": str(e), "traceback": traceback.format_exc()}
+    from app.storage import get_latest_report, get_required_docs_count
+    from app.models import Pack, CaseSummary
+    
+    first_file = next(CASES_DIR.glob("*.json"), None)
+    err_info = None
+    if first_file:
+        try:
+            with open(first_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            pack = Pack.model_validate(data)
+            rep = get_latest_report(pack.case_id)
+            summary = CaseSummary(
+                case_id=pack.case_id,
+                category=pack.category,
+                description=pack.description,
+                applicant_name=pack.cnic.name,
+                proposed_kw=pack.system.proposed_kw,
+                sanctioned_load_kw=pack.bill.sanctioned_load_kw,
+                docs_present_count=len(pack.docs_present),
+                docs_required_count=get_required_docs_count(pack),
+                overall=rep.overall if rep else "READY",
+                readiness=rep.readiness_score if rep else 100.0,
+                reviewed=False,
+            )
+            err_info = "Success: " + summary.case_id
+        except Exception as e:
+            err_info = "Error: " + str(e) + "\n" + traceback.format_exc()
+
+    return {
+        "first_file": str(first_file),
+        "err_info": err_info,
+    }
 
 
 @app.get("/api/cases")
