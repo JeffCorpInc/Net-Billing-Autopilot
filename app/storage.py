@@ -156,10 +156,28 @@ def get_uploaded_file_path(case_id: str, filename: str) -> Path | None:
 
 
 def get_latest_report(case_id: str) -> CaseReport | None:
-    """Load latest CaseReport if available."""
+    """Load latest CaseReport if available (checks runtime directory, bundled data, or calculates on-the-fly)."""
     report_file = REPORTS_DIR / f"{case_id}.json"
     if not report_file.exists():
-        return None
+        bundled_file = DATA_DIR / "runtime" / "reports" / f"{case_id}.json"
+        if bundled_file.exists():
+            report_file = bundled_file
+        else:
+            if case_id.startswith("C"):
+                pack = get_pack(case_id)
+                if pack:
+                    from app.merge import build_case_report
+                    from app.rules import run_code_rules
+
+                    rule_results = run_code_rules(pack)
+                    report = build_case_report(pack=pack, rule_results=rule_results)
+                    try:
+                        save_report(report)
+                    except Exception:
+                        pass
+                    return report
+            return None
+
     try:
         with open(report_file, "r", encoding="utf-8") as f:
             data = json.load(f)
