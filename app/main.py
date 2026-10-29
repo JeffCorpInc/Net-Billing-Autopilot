@@ -1,3 +1,4 @@
+import urllib.parse
 """FastAPI application entrypoint: page routes, API endpoints, error handling."""
 
 from pathlib import Path
@@ -40,37 +41,51 @@ class VercelPathFixMiddleware:
 
     async def __call__(self, scope, receive, send):
         if scope.get("type") == "http":
-            headers_dict = dict(scope.get("headers", []))
-            matched_path = None
-            for hname in (
-                b"x-matched-path",
-                b"x-original-uri",
-                b"x-real-path",
-                b"x-forwarded-uri",
-                b"x-vercel-matched-path",
-            ):
-                raw_val = headers_dict.get(hname)
-                if raw_val:
-                    val = raw_val.decode("utf-8", errors="ignore").split("?")[0]
-                    if val and val not in ("/api/index", "/api/index.py", "/api"):
-                        matched_path = val
-                        break
+            # 1. First check explicit query parameter from Vercel rewrite
+            raw_qs = scope.get("query_string", b"").decode("utf-8", errors="ignore")
+            params = urllib.parse.parse_qs(raw_qs)
+            orig_path = params.get("__orig_path", [""])[0]
 
-            path = scope.get("path", "")
-            if matched_path:
-                scope["path"] = matched_path
-                scope["raw_path"] = matched_path.encode("utf-8")
-            elif path.startswith("/api/index/"):
-                sub = path[len("/api/index"):]
-                scope["path"] = sub
-                scope["raw_path"] = sub.encode("utf-8")
-            elif path.startswith("/api/index.py/"):
-                sub = path[len("/api/index.py"):]
-                scope["path"] = sub
-                scope["raw_path"] = sub.encode("utf-8")
-            elif path in ("/api/index", "/api/index.py"):
-                scope["path"] = "/"
-                scope["raw_path"] = b"/"
+            if orig_path:
+                clean_path = "/" + orig_path.lstrip("/")
+                scope["path"] = clean_path
+                scope["raw_path"] = clean_path.encode("utf-8")
+                # Clean up __orig_path from downstream query string
+                filtered = {k: v for k, v in params.items() if k != "__orig_path"}
+                scope["query_string"] = urllib.parse.urlencode(filtered, doseq=True).encode("utf-8")
+            else:
+                # 2. Check proxy matched path headers
+                headers_dict = dict(scope.get("headers", []))
+                matched_path = None
+                for hname in (
+                    b"x-matched-path",
+                    b"x-original-uri",
+                    b"x-real-path",
+                    b"x-forwarded-uri",
+                    b"x-vercel-matched-path",
+                ):
+                    raw_val = headers_dict.get(hname)
+                    if raw_val:
+                        val = raw_val.decode("utf-8", errors="ignore").split("?")[0]
+                        if val and val not in ("/api/index", "/api/index.py", "/api"):
+                            matched_path = val
+                            break
+
+                path = scope.get("path", "")
+                if matched_path:
+                    scope["path"] = matched_path
+                    scope["raw_path"] = matched_path.encode("utf-8")
+                elif path.startswith("/api/index/"):
+                    sub = path[len("/api/index"):]
+                    scope["path"] = sub
+                    scope["raw_path"] = sub.encode("utf-8")
+                elif path.startswith("/api/index.py/"):
+                    sub = path[len("/api/index.py"):]
+                    scope["path"] = sub
+                    scope["raw_path"] = sub.encode("utf-8")
+                elif path in ("/api/index", "/api/index.py"):
+                    scope["path"] = "/"
+                    scope["raw_path"] = b"/"
 
         await self.asgi_app(scope, receive, send)
 
