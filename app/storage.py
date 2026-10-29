@@ -9,6 +9,7 @@ from app.config import (
     AUDIT_DIR,
     CASES_DIR,
     CUSTOM_CASES_DIR,
+    DATA_DIR,
     LOAD_FLOW_THRESHOLD_KW,
     REPORTS_DIR,
     REVIEWS_PATH,
