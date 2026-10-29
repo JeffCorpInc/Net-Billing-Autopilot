@@ -290,12 +290,13 @@ def complete_json(
             return None, meta
 
         gemini_model = settings.llm_model or "gemini-flash-lite-latest"
+        if gemini_model in ("gemini-flash", "gemini-1.5-flash", "gemini-2.0-flash"):
+            gemini_model = "gemini-2.5-flash"
         fallback_models = [
             gemini_model,
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
             "gemini-flash-lite-latest",
-            "gemini-3.5-flash-lite",
-            "gemini-3.1-flash-lite",
-            "gemini-3-flash-preview",
         ]
         # Deduplicate while preserving order
         model_chain = list(dict.fromkeys(fallback_models))
