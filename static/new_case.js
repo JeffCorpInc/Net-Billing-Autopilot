@@ -143,19 +143,21 @@
     updateConsentSubmitState();
 
     modal.classList.remove('hidden');
-    modal.classList.add('flex');
 
     if (scrollBody) {
       scrollBody.scrollTop = 0;
     }
     if (window.lucide) window.lucide.createIcons({ root: modal });
+
+    setTimeout(() => {
+      modal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
   }
 
   function closeConsentModal() {
     const modal = document.getElementById('consent-modal');
     if (!modal) return;
     modal.classList.add('hidden');
-    modal.classList.remove('flex');
   }
 
   function updateConsentSubmitState() {

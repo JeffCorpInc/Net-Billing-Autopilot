@@ -303,38 +303,38 @@
       </button>
     </div>
 
-    <!-- Applicant Consent & Document Authenticity Declaration Modal -->
-    <div id="consent-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
-      <div class="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+    <!-- Applicant Consent & Document Authenticity Declaration Section (Inline Step 5 Card — No Dark Backdrop Overlay) -->
+    <div id="consent-modal" class="hidden pt-2 pb-10">
+      <div class="relative w-full bg-white dark:bg-slate-900 border-2 border-amber-400/80 dark:border-amber-500/60 rounded-3xl shadow-xl overflow-hidden flex flex-col ring-4 ring-amber-500/10">
 
-        <!-- Modal Header -->
-        <div class="px-6 py-4 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+        <!-- Card Header (Bright Warm Solar Gradient) -->
+        <div class="px-6 py-5 bg-gradient-to-r from-amber-50/90 via-white to-teal-50/60 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border-b border-amber-200/80 dark:border-slate-800 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-400 text-slate-950 shadow-md flex items-center justify-center shrink-0">
               <i data-lucide="scale" class="w-5 h-5"></i>
             </div>
             <div>
-              <div class="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">
-                NEPRA SRO 251(I)/2026 • Schedule-V Undertaking
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-400/40 text-[10px] font-mono uppercase tracking-widest font-bold mb-1">
+                <span>Step 5 • NEPRA SRO 251(I)/2026 Schedule-V Undertaking</span>
               </div>
-              <h3 class="text-base sm:text-lg font-extrabold text-white tracking-tight">
+              <h3 class="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Applicant Declaration &amp; Document Authenticity Consent
               </h3>
             </div>
           </div>
-          <button id="close-consent-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Close Consent Form">
+          <button id="close-consent-btn" type="button" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Collapse Consent Form">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
 
         <!-- Instruction Banner + Jump Down Arrow Button -->
-        <div class="px-6 py-2.5 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200/70 dark:border-amber-800/60 flex items-center justify-between gap-3 shrink-0">
-          <p id="consent-scroll-hint" class="text-[11px] font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
-            <i data-lucide="info" class="w-3.5 h-3.5 shrink-0"></i>
-            <span>Please read the complete undertaking to the bottom to unlock final submission.</span>
+        <div class="px-6 py-3 bg-slate-50/90 dark:bg-slate-850/90 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <p id="consent-scroll-hint" class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+            <i data-lucide="info" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0"></i>
+            <span>Please review the declaration to the bottom (or click the arrow button) to unlock final submission.</span>
           </p>
           <button id="consent-scroll-down-btn" type="button"
-            class="px-3 py-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-[11px] inline-flex items-center gap-1.5 shadow-md transition-all active:scale-95 shrink-0 cursor-pointer"
+            class="px-4 py-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs inline-flex items-center gap-1.5 shadow-sm transition-all active:scale-95 shrink-0 cursor-pointer"
             title="Jump to the bottom of the Consent Form">
             <span>Jump to Bottom</span>
             <i data-lucide="arrow-down" class="w-3.5 h-3.5 animate-bounce"></i>
@@ -342,15 +342,15 @@
         </div>
 
         <!-- Scrollable Declaration Content -->
-        <div id="consent-scroll-body" class="p-6 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-700 dark:text-slate-300 max-h-[46vh]">
-          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 font-medium text-slate-800 dark:text-slate-200">
+        <div id="consent-scroll-body" class="p-6 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-700 dark:text-slate-300 max-h-[360px] bg-white dark:bg-slate-900">
+          <div class="p-4 rounded-2xl bg-amber-50/50 dark:bg-slate-850 border border-amber-200/70 dark:border-slate-800 font-medium text-slate-800 dark:text-slate-200">
             I, the undersigned Applicant / Authorized Representative, hereby solemnly affirm, declare, and undertake as follows in connection with this Distributed Generation (Net-Billing) Application submitted to K-Electric under the <strong>NEPRA (Prosumer) Regulations, 2026</strong>:
           </div>
 
-          <div class="space-y-3">
-            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
+          <div class="grid grid-cols-1 gap-3">
+            <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-850/60 border border-slate-200/80 dark:border-slate-800 space-y-1">
               <h4 class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center justify-center">1</span>
+                <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-[11px] font-mono font-bold flex items-center justify-center">1</span>
                 <span>Truthfulness &amp; Accuracy of Entered Information</span>
               </h4>
               <p class="text-slate-600 dark:text-slate-400 pl-7">
@@ -358,9 +358,9 @@
               </p>
             </div>
 
-            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
+            <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-850/60 border border-slate-200/80 dark:border-slate-800 space-y-1">
               <h4 class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center justify-center">2</span>
+                <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-[11px] font-mono font-bold flex items-center justify-center">2</span>
                 <span>Authenticity &amp; Legitimacy of Submitted Documents</span>
               </h4>
               <p class="text-slate-600 dark:text-slate-400 pl-7">
@@ -368,9 +368,9 @@
               </p>
             </div>
 
-            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
+            <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-850/60 border border-slate-200/80 dark:border-slate-800 space-y-1">
               <h4 class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center justify-center">3</span>
+                <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-[11px] font-mono font-bold flex items-center justify-center">3</span>
                 <span>Regulatory &amp; Grid Safety Undertaking (NEPRA Reg. 3, 4 &amp; 9)</span>
               </h4>
               <p class="text-slate-600 dark:text-slate-400 pl-7">
@@ -378,9 +378,9 @@
               </p>
             </div>
 
-            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
+            <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-850/60 border border-slate-200/80 dark:border-slate-800 space-y-1">
               <h4 class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center justify-center">4</span>
+                <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-[11px] font-mono font-bold flex items-center justify-center">4</span>
                 <span>Liability for Misrepresentation or Forged Documents</span>
               </h4>
               <p class="text-slate-600 dark:text-slate-400 pl-7">
@@ -388,9 +388,9 @@
               </p>
             </div>
 
-            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
+            <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-850/60 border border-slate-200/80 dark:border-slate-800 space-y-1">
               <h4 class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center justify-center">5</span>
+                <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-[11px] font-mono font-bold flex items-center justify-center">5</span>
                 <span>Consent to Automated Compliance &amp; Staff Review</span>
               </h4>
               <p class="text-slate-600 dark:text-slate-400 pl-7">
@@ -401,7 +401,7 @@
 
           <!-- Bottom Anchor & Explicit Acknowledgment Checkbox -->
           <div id="consent-bottom-anchor" class="pt-3 border-t border-slate-200 dark:border-slate-800">
-            <label class="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/80 cursor-pointer">
+            <label class="flex items-start gap-3 p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border-2 border-emerald-300/80 dark:border-emerald-800/80 cursor-pointer hover:bg-emerald-50 transition-colors">
               <input id="consent-agree-checkbox" type="checkbox" class="mt-0.5 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
               <span class="text-xs font-bold text-slate-900 dark:text-white leading-snug">
                 I confirm that I have read the entire Consent &amp; Undertaking above, and I certify that all entered details and uploaded documents are authentic, accurate, and legitimate.
@@ -410,14 +410,14 @@
           </div>
         </div>
 
-        <!-- Modal Footer with Locked/Unlocked Final Submission Button -->
+        <!-- Card Footer with Locked/Unlocked Final Submission Button -->
         <div class="px-6 py-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-          <button id="cancel-consent-btn" type="button" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-colors cursor-pointer">
-            Back to Form
+          <button id="cancel-consent-btn" type="button" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-colors cursor-pointer">
+            Hide Consent Form
           </button>
 
           <button id="submit-new-case-btn" type="submit" disabled
-            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition-all shadow-xl flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed cursor-pointer">
+            class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed cursor-pointer">
             <span id="submit-spinner" class="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin hidden"></span>
             <i data-lucide="shield-check" class="w-4 h-4"></i>
             <span id="submit-btn-text">
@@ -443,5 +443,5 @@
 <script>
   window.__INITIAL_PACK__ = {{ pack_json | safe }};
 </script>
-<script src="/static/new_case.js?v=5"></script>
+<script src="/static/new_case.js?v=6"></script>
 {% endblock %}
