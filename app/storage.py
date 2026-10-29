@@ -55,18 +55,27 @@ def save_review(case_id: str, staff_name: str, note: str = "") -> dict[str, Any]
 
 
 def get_pack(case_id: str) -> Pack | None:
-    """Load pack JSON for a given case ID (checks both built-in and custom user cases)."""
-    file_path = CASES_DIR / f"{case_id}.json"
+    """Load pack JSON for a given case ID (checks built-in, custom, and bundled cases)."""
+    cid = case_id.strip()
+    file_path = CASES_DIR / f"{cid}.json"
     if not file_path.exists():
-        file_path = CUSTOM_CASES_DIR / f"{case_id}.json"
-    if not file_path.exists():
-        return None
+        file_path = CUSTOM_CASES_DIR / f"{cid}.json"
+    if file_path.exists():
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                return Pack.model_validate(json.load(f))
+        except Exception:
+            pass
+
+    # Guaranteed fallback to pre-bundled benchmark cases
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return Pack.model_validate(data)
+        from app.bundled_cases import BUNDLED_CASES
+        raw_pack = BUNDLED_CASES.get(cid.upper())
+        if raw_pack:
+            return Pack.model_validate(raw_pack)
     except Exception:
-        return None
+        pass
+    return None
 
 
 def next_custom_case_id() -> str:
@@ -157,33 +166,48 @@ def get_uploaded_file_path(case_id: str, filename: str) -> Path | None:
 
 def get_latest_report(case_id: str) -> CaseReport | None:
     """Load latest CaseReport if available (checks runtime directory, bundled data, or calculates on-the-fly)."""
-    report_file = REPORTS_DIR / f"{case_id}.json"
-    if not report_file.exists():
-        bundled_file = DATA_DIR / "runtime" / "reports" / f"{case_id}.json"
-        if bundled_file.exists():
-            report_file = bundled_file
-        else:
-            if case_id.startswith("C"):
-                pack = get_pack(case_id)
-                if pack:
-                    from app.merge import build_case_report
-                    from app.rules import run_code_rules
+    cid = case_id.strip().upper()
+    report_file = REPORTS_DIR / f"{cid}.json"
+    if report_file.exists():
+        try:
+            with open(report_file, "r", encoding="utf-8") as f:
+                return CaseReport.model_validate(json.load(f))
+        except Exception:
+            pass
 
-                    rule_results = run_code_rules(pack)
-                    report = build_case_report(pack=pack, rule_results=rule_results)
-                    try:
-                        save_report(report)
-                    except Exception:
-                        pass
-                    return report
-            return None
+    bundled_file = DATA_DIR / "runtime" / "reports" / f"{cid}.json"
+    if bundled_file.exists():
+        try:
+            with open(bundled_file, "r", encoding="utf-8") as f:
+                return CaseReport.model_validate(json.load(f))
+        except Exception:
+            pass
 
+    # Check pre-bundled reports in memory
     try:
-        with open(report_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return CaseReport.model_validate(data)
+        from app.bundled_cases import BUNDLED_REPORTS
+        raw_rep = BUNDLED_REPORTS.get(cid)
+        if raw_rep:
+            return CaseReport.model_validate(raw_rep)
     except Exception:
-        return None
+        pass
+
+    # Calculate on-the-fly if benchmark case
+    if cid.startswith("C"):
+        pack = get_pack(cid)
+        if pack:
+            from app.merge import build_case_report
+            from app.rules import run_code_rules
+
+            rule_results = run_code_rules(pack)
+            report = build_case_report(pack=pack, rule_results=rule_results)
+            try:
+                save_report(report)
+            except Exception:
+                pass
+            return report
+
+    return None
 
 
 def save_report(report: CaseReport) -> None:
@@ -205,7 +229,35 @@ def list_case_summaries(include_custom: bool = True) -> list[CaseSummary]:
         case_files.extend(custom_files)
 
     builtin_files = sorted(CASES_DIR.glob("*.json"), key=lambda p: p.stem)
-    case_files.extend(builtin_files)
+    if builtin_files:
+        case_files.extend(builtin_files)
+    else:
+        # Fallback to pre-bundled cases if filesystem directory is unpopulated on serverless
+        try:
+            from app.bundled_cases import BUNDLED_CASES
+            for cid in sorted(BUNDLED_CASES.keys()):
+                pack = Pack.model_validate(BUNDLED_CASES[cid])
+                report = get_latest_report(pack.case_id)
+                is_reviewed = pack.case_id in reviews
+                overall = report.overall if report else "READY"
+                readiness = report.readiness_score if report else 100.0
+                summaries.append(
+                    CaseSummary(
+                        case_id=pack.case_id,
+                        category=pack.category,
+                        description=pack.description,
+                        applicant_name=pack.cnic.name,
+                        proposed_kw=pack.system.proposed_kw,
+                        sanctioned_load_kw=pack.bill.sanctioned_load_kw,
+                        docs_present_count=len(pack.docs_present),
+                        docs_required_count=get_required_docs_count(pack),
+                        overall=overall,
+                        readiness=readiness,
+                        reviewed=is_reviewed,
+                    )
+                )
+        except Exception:
+            pass
 
     for path in case_files:
         try:

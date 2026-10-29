@@ -533,12 +533,10 @@ async def assistant_chat_endpoint(request: Request):
             detail="AI Assistant is available only for New Applications and Custom User Cases (U01, U02...).",
         )
 
-    # If draft_state is not passed directly, load from saved custom case pack
+    # If draft_state is not passed directly, load from saved custom case pack if available
     if not isinstance(draft_state, dict):
-        pack = get_pack(case_id)
-        if not pack:
-            raise HTTPException(status_code=404, detail=f"Custom case {case_id} not found")
-        draft_state = pack.model_dump()
+        pack = get_pack(case_id) if case_id != "DRAFT" else None
+        draft_state = pack.model_dump() if pack else {}
 
     result = await run_in_threadpool(
         run_assistant_chat,
