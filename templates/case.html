@@ -711,12 +711,14 @@
     </div>
   </div>
 
+</div>
+{% endblock %}
+
+{% block floating_widget %}
   <!-- Scoped AI Onboarding Assistant (ONLY for Custom User Cases U*, NEVER for Benchmark Cases C01-C21) -->
   {% if is_custom_case %}
     {% include "assistant_widget.html" %}
   {% endif %}
-
-</div>
 {% endblock %}
 
 {% block extra_scripts %}

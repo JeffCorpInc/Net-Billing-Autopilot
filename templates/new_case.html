@@ -295,10 +295,12 @@
 
   </form>
 
-  <!-- Scoped AI Onboarding Assistant (New & Edit Application Mode) -->
-  {% include "assistant_widget.html" %}
-
 </div>
+{% endblock %}
+
+{% block floating_widget %}
+  <!-- Scoped AI Onboarding Assistant (New & Edit Application Mode — rendered at viewport root) -->
+  {% include "assistant_widget.html" %}
 {% endblock %}
 
 {% block extra_scripts %}

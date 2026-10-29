@@ -186,6 +186,9 @@
     </div>
   </div>
 
+  <!-- Scoped Floating Widgets (Rendered outside transformed containers so position:fixed anchors to true viewport) -->
+  {% block floating_widget %}{% endblock %}
+
   <!-- Global Toast Notification Container -->
   <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
