@@ -28,6 +28,19 @@
       populateFromPack(window.__INITIAL_PACK__);
     }
 
+    // If redirected via hash (#f-...) from AI Assistant jump link, focus & highlight target field
+    if (window.location.hash && window.location.hash.startsWith('#f-')) {
+      const targetId = window.location.hash.substring(1);
+      setTimeout(() => {
+        const el = document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.focus();
+          el.classList.add('ring-2', 'ring-amber-500');
+        }
+      }, 250);
+    }
+
     if (cleanBtn) cleanBtn.addEventListener('click', () => {
       fillCleanSample();
       if (window.NetBill?.Toast) {

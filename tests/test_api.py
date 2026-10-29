@@ -181,3 +181,80 @@ def test_create_and_delete_custom_case(client):
         del_res = client.delete(f"/api/cases/{case_id}")
         assert del_res.status_code == 200
 
+
+def test_assistant_chat_endpoint_and_visibility(client):
+    """Test AI Onboarding Assistant endpoint, PII scrubbing, and strict page visibility."""
+    # 1. Verify /new page includes the AI Assistant widget
+    new_page = client.get("/new")
+    assert new_page.status_code == 200
+    assert 'id="ai-assistant-root"' in new_page.text
+
+    # 2. Verify built-in benchmark case /case/C01 does NOT include the AI Assistant widget
+    c01_page = client.get("/case/C01")
+    assert c01_page.status_code == 200
+    assert 'id="ai-assistant-root"' not in c01_page.text
+
+    # 3. Verify POST /api/assistant/chat rejects built-in benchmark cases (C01-C21)
+    bad_chat = client.post("/api/assistant/chat", json={"case_id": "C01", "message": "What is wrong?"})
+    assert bad_chat.status_code == 400
+
+    # 4. Verify POST /api/assistant/chat detects mistakes in live draft_state and scrubs PII
+    draft_with_errors = {
+        "applicant_type": "residential",
+        "is_tenant": True,
+        "docs_present": ["cnic", "bill"],  # missing required docs + tenant missing lease & NOC
+        "cnic": {
+            "name": "Salman Siddiqui",
+            "father_name": "Riaz Siddiqui",
+            "cnic_no": "42101-9988776-1",
+            "expiry": "2024-01-01",  # Expired CNIC (R1 fail)
+            "address": "Bungalow B-19, Block 13-D, Gulshan-e-Iqbal, Karachi",
+        },
+        "bill": {
+            "consumer_name": "Kamran Qureshi",  # L1 Name mismatch
+            "reference_no": "0400099887766",
+            "sanctioned_load_kw": 10.0,
+            "connected_load_kw": 12.0,  # R4 fail
+            "tariff": "A-1",
+            "connection_phase": "1-phase",  # R5 fail
+            "address": "B-19, Blk 13-D, Gulshan-e-Iqbal, Karachi",
+        },
+        "ownership": {
+            "type": "sale_deed",
+            "owner_name": "Salman Siddiqui",
+            "property_address": "Bungalow B-19, Block 13-D, Gulshan-e-Iqbal, Karachi",
+        },
+        "system": {
+            "proposed_kw": 14.0,  # R3 fail (exceeds 10.0 kW)
+            "inverter_kw": 15.0,  # R6 fail (inverter > proposed)
+            "panel_count": 27,
+            "panel_watt": 550,
+        },
+    }
+
+    chat_res = client.post(
+        "/api/assistant/chat",
+        json={
+            "case_id": "NEW",
+            "draft_state": draft_with_errors,
+            "message": "What did I do wrong in my application?",
+        },
+    )
+    assert chat_res.status_code == 200
+    data = chat_res.json()
+    assert data["issue_count"] >= 5
+    assert "reply" in data and len(data["reply"]) > 10
+    issue_rules = {iss["rule_id"] for iss in data["issues"]}
+    assert "R2" in issue_rules
+    assert "R3" in issue_rules
+    assert "R4" in issue_rules
+    assert "R5" in issue_rules
+    assert "R7" in issue_rules
+    assert "L1" in issue_rules
+
+    # Ensure raw CNIC and 13-digit reference number do NOT leak in assistant response
+    raw_json_str = str(data)
+    assert "42101-9988776-1" not in raw_json_str
+    assert "0400099887766" not in raw_json_str
+
+

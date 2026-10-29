@@ -142,6 +142,7 @@ async def edit_case_page(request: Request, case_id: str):
 @app.get("/cases/{case_id}", response_class=HTMLResponse)
 async def case_page(request: Request, case_id: str):
     """Render individual application case page."""
+    import json
     from app.storage import get_latest_report, get_pack, list_uploaded_files, load_reviews
     pack = get_pack(case_id)
     if not pack:
@@ -157,6 +158,7 @@ async def case_page(request: Request, case_id: str):
         "active_page": "case",
         "case_id": case_id,
         "pack": pack,
+        "pack_json": json.dumps(pack.model_dump()),
         "report": report,
         "review": review,
         "uploaded_files": uploaded_files,
@@ -431,6 +433,43 @@ async def delete_case_endpoint(case_id: str):
     if not deleted:
         raise HTTPException(status_code=404, detail=f"Custom case {case_id} not found")
     return {"status": "ok", "deleted": case_id.upper()}
+
+
+@app.post("/api/assistant/chat")
+async def assistant_chat_endpoint(request: Request):
+    """AI Onboarding Copilot endpoint for live form validation & custom user case Q&A."""
+    from app.assistant import run_assistant_chat
+    from app.storage import get_pack
+
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+    case_id = str(body.get("case_id") or "DRAFT").strip()
+    user_message = str(body.get("message") or "").strip()
+    draft_state = body.get("draft_state")
+
+    # Block benchmark cases C01..C21 from using the custom user assistant
+    if case_id.upper().startswith("C") and case_id[1:].isdigit():
+        raise HTTPException(
+            status_code=400,
+            detail="AI Assistant is available only for New Applications and Custom User Cases (U01, U02...).",
+        )
+
+    # If draft_state is not passed directly, load from saved custom case pack
+    if not isinstance(draft_state, dict):
+        pack = get_pack(case_id)
+        if not pack:
+            raise HTTPException(status_code=404, detail=f"Custom case {case_id} not found")
+        draft_state = pack.model_dump()
+
+    result = run_assistant_chat(
+        case_id=case_id,
+        draft_state=draft_state,
+        user_message=user_message,
+    )
+    return result
 
 
 @app.get("/api/cases/{case_id}")

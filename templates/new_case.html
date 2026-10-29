@@ -295,6 +295,9 @@
 
   </form>
 
+  <!-- Scoped AI Onboarding Assistant (New & Edit Application Mode) -->
+  {% include "assistant_widget.html" %}
+
 </div>
 {% endblock %}
 
@@ -303,4 +306,5 @@
   window.__INITIAL_PACK__ = {{ pack_json | safe }};
 </script>
 <script src="/static/new_case.js"></script>
+<script src="/static/assistant.js"></script>
 {% endblock %}

@@ -173,6 +173,35 @@ def _handle_mock_response(
             results.append({"check_id": cid, "text": text})
         return {"items": results}
 
+    # Assistant Chat Mock
+    if task == "assistant_chat" or "NetBill Assist AI Copilot" in system:
+        issues = user_data.get("detected_issues", [])
+        missing = user_data.get("missing_fields", [])
+        question = str(user_data.get("user_message", "")).strip()
+
+        if not issues and not missing:
+            reply = (
+                "All entered fields and documents look compliant with NEPRA (Prosumer) Regulations 2026 "
+                "and K-Electric Net-Billing Guidelines! Your CNIC format/expiry, 3-phase connection, "
+                "system capacity, and document names/addresses all match."
+            )
+        else:
+            lines = []
+            if missing:
+                lines.append(f"You still have **{len(missing)} incomplete field(s)**: {', '.join(m['label'] for m in missing[:4])}.")
+            if issues:
+                lines.append(f"I found **{len(issues)} compliance / mismatch issue(s)** in your entries:")
+                for idx, iss in enumerate(issues, 1):
+                    lines.append(f"{idx}. **[{iss.get('rule_id', 'Check')}] {iss.get('title', '')}:** {iss.get('message', '')} → *Fix:* {iss.get('fix', '')}")
+            if question:
+                lines.append(f"\nRegarding your question (*\"{question}\"*): please review the highlighted fields above and update them so your application passes all 8 checks.")
+            reply = "\n".join(lines)
+
+        return {
+            "reply": reply,
+            "next_steps": [iss.get("fix", "") for iss in issues[:3] if iss.get("fix")],
+        }
+
     # Generic fallback mock
     return {"verdict": "PASS", "confidence": 0.9, "reason": "Mock default pass."}
 

@@ -711,11 +711,22 @@
     </div>
   </div>
 
+  <!-- Scoped AI Onboarding Assistant (ONLY for Custom User Cases U*, NEVER for Benchmark Cases C01-C21) -->
+  {% if is_custom_case %}
+    {% include "assistant_widget.html" %}
+  {% endif %}
+
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script src="/static/case.js"></script>
+{% if is_custom_case %}
+<script>
+  window.__CASE_PACK__ = {{ pack_json | safe }};
+</script>
+<script src="/static/assistant.js"></script>
+{% endif %}
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     CasePage.init('{{ pack.case_id }}');
