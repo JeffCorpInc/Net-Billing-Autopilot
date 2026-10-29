@@ -189,8 +189,8 @@
   <!-- Scoped Floating Widgets (Rendered outside transformed containers so position:fixed anchors to true viewport) -->
   {% block floating_widget %}{% endblock %}
 
-  <!-- Global Toast Notification Container -->
-  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+  <!-- Global Toast Notification Container (Top-right below header so it never collides with bottom-right AI Bot icon) -->
+  <div id="toast-container" class="fixed top-20 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Reusable Global Modal Component -->
   <div id="global-modal-overlay" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">

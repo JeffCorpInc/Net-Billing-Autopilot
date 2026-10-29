@@ -77,14 +77,17 @@
     },
 
     togglePanel() {
-      if (this.isOpen) this.closePanel();
-      else this.openPanel();
+      if (this.isOpen) {
+        this.closePanel();
+      } else {
+        this.openPanel();
+      }
     },
 
     openPanel() {
       const panel = document.getElementById('ai-assistant-panel');
       if (!panel) return;
-      panel.classList.remove('hidden');
+      panel.style.display = 'flex';
       this.isOpen = true;
       if (window.lucide) window.lucide.createIcons({ root: panel });
     },
@@ -92,7 +95,7 @@
     closePanel() {
       const panel = document.getElementById('ai-assistant-panel');
       if (!panel) return;
-      panel.classList.add('hidden');
+      panel.style.display = 'none';
       this.isOpen = false;
     },
 
@@ -160,7 +163,7 @@
       const badge = document.getElementById('ai-assistant-badge');
       if (!badge) return;
       if (issueCount > 0) {
-        badge.textContent = `${issueCount} issue${issueCount > 1 ? 's' : ''}`;
+        badge.textContent = `${issueCount}`;
         badge.classList.remove('hidden');
       } else {
         badge.classList.add('hidden');
@@ -322,3 +325,4 @@
 
   window.AssistantCopilot = AssistantCopilot;
 })();
+

@@ -2,11 +2,12 @@
 <div id="ai-assistant-root"
      data-case-id="{{ case_id if case_id is defined else next_case_id }}"
      data-context-mode="{{ 'form' if active_page == 'new_case' else 'case_view' }}"
-     class="fixed right-3 top-1/2 -translate-y-1/2 z-40 flex items-center pointer-events-none">
+     class="fixed bottom-6 right-7 z-40 flex flex-col items-end pointer-events-none">
 
-  <!-- Expandable Chat Panel (Opens to the left of the circular right-center bot icon) -->
+  <!-- Expandable Chat Panel (Opens directly ABOVE the circular bot icon) -->
   <div id="ai-assistant-panel"
-       class="hidden pointer-events-auto mr-3 w-[340px] sm:w-[390px] max-h-[78vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200">
+       style="display: none;"
+       class="pointer-events-auto mb-3.5 w-[350px] sm:w-[400px] max-h-[75vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl flex-col overflow-hidden transition-all duration-200">
 
     <!-- Panel Header -->
     <div class="bg-gradient-to-r from-[#0F172A] via-slate-900 to-slate-800 text-white px-4 py-3.5 flex items-center justify-between border-b border-slate-800">
@@ -53,9 +54,9 @@
     </div>
 
     <!-- Messages Container -->
-    <div id="ai-assistant-messages" class="flex-1 p-3.5 space-y-3 overflow-y-auto max-h-[360px] text-xs bg-white dark:bg-slate-900">
+    <div id="ai-assistant-messages" class="flex-1 p-3.5 space-y-3 overflow-y-auto max-h-[340px] text-xs bg-white dark:bg-slate-900">
       <div class="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 leading-relaxed">
-        👋 Hi! I'm your **NetBill AI Copilot**. As you fill in or edit your application, click **"Check Now"** or ask me anything—I'll flag wrong steps, capacity violations, expired CNICs, or name/address mismatches and highlight the exact field to fix.
+        👋 Hi! I'm your <strong>NetBill AI Copilot</strong>. Click <strong>"Check Now"</strong> or ask me anything—I'll flag wrong steps, capacity violations, expired CNICs, or name/address mismatches and highlight the exact field to fix.
       </div>
     </div>
 
@@ -71,20 +72,20 @@
     </form>
   </div>
 
-  <!-- Circular Floating Bot Icon (Docked at Extreme Right-Center of True Viewport) -->
+  <!-- Circular Floating Bot Icon (Bottom-Right Corner with Scrollbar Clearance) -->
   <button id="ai-assistant-toggle-btn" type="button"
           title="AI Onboarding Copilot — Click to inspect errors & mismatches"
           aria-label="Open AI Onboarding Copilot"
-          class="pointer-events-auto group relative w-13 h-13 p-3.5 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 shadow-2xl ring-4 ring-amber-500/25 border-2 border-white dark:border-slate-800 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95">
-    <i data-lucide="bot" class="w-6 h-6 stroke-[2.2]"></i>
+          class="pointer-events-auto group relative w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 shadow-2xl ring-4 ring-amber-500/25 border-2 border-white dark:border-slate-800 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer">
+    <i data-lucide="bot" class="w-7 h-7 stroke-[2.2]"></i>
 
     <!-- Top-Right Notification Badge for Detected Issues -->
     <span id="ai-assistant-badge"
-          class="hidden absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 rounded-full text-[10px] font-extrabold bg-rose-600 text-white border-2 border-white dark:border-slate-900 flex items-center justify-center shadow-md">
+          class="hidden absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] px-1 rounded-full text-[10px] font-extrabold bg-rose-600 text-white border-2 border-white dark:border-slate-900 flex items-center justify-center shadow-md">
       0
     </span>
 
-    <!-- Hover Tooltip Pill -->
+    <!-- Hover Tooltip Pill (Left of Circle) -->
     <span class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute right-16 whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[11px] font-bold shadow-lg border border-slate-700">
       AI Copilot
     </span>
