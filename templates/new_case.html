@@ -286,7 +286,7 @@
       </div>
     </div>
 
-    <!-- Submit Bar -->
+    <!-- Submit Bar (Opens Consent & Authenticity Declaration Modal) -->
     <div class="flex items-center justify-between gap-4 pt-2 pb-8">
       {% if edit_mode %}
       <a href="/case/{{ next_case_id }}" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-colors">
@@ -297,13 +297,136 @@
         Clear Form
       </button>
       {% endif %}
-      <button id="submit-new-case-btn" type="submit" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition-all shadow-xl flex items-center gap-2 active:scale-95">
-        <span id="submit-spinner" class="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin hidden"></span>
-        <i data-lucide="shield-check" class="w-4 h-4"></i>
-        <span id="submit-btn-text">
-          {% if edit_mode %}Save Changes &amp; Re-Run Compliance Checks{% else %}Submit Application &amp; Run Compliance Checks{% endif %}
-        </span>
+      <button id="open-consent-btn" type="button" class="px-7 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition-all shadow-xl flex items-center gap-2 active:scale-95 cursor-pointer">
+        <i data-lucide="file-check-2" class="w-4 h-4"></i>
+        <span>Submit Form</span>
       </button>
+    </div>
+
+    <!-- Applicant Consent & Document Authenticity Declaration Modal -->
+    <div id="consent-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
+      <div class="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+
+        <!-- Modal Header -->
+        <div class="px-6 py-4 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+              <i data-lucide="scale" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">
+                NEPRA SRO 251(I)/2026 • Schedule-V Undertaking
+              </div>
+              <h3 class="text-base sm:text-lg font-extrabold text-white tracking-tight">
+                Applicant Declaration &amp; Document Authenticity Consent
+              </h3>
+            </div>
+          </div>
+          <button id="close-consent-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Close Consent Form">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Instruction Banner + Jump Down Arrow Button -->
+        <div class="px-6 py-2.5 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200/70 dark:border-amber-800/60 flex items-center justify-between gap-3 shrink-0">
+          <p id="consent-scroll-hint" class="text-[11px] font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+            <i data-lucide="info" class="w-3.5 h-3.5 shrink-0"></i>
+            <span>Please read the complete undertaking to the bottom to unlock final submission.</span>
+          </p>
+          <button id="consent-scroll-down-btn" type="button"
+            class="px-3 py-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-[11px] inline-flex items-center gap-1.5 shadow-md transition-all active:scale-95 shrink-0 cursor-pointer"
+            title="Jump to the bottom of the Consent Form">
+            <span>Jump to Bottom</span>
+            <i data-lucide="arrow-down" class="w-3.5 h-3.5 animate-bounce"></i>
+          </button>
+        </div>
+
+        <!-- Scrollable Declaration Content -->
+        <div id="consent-scroll-body" class="p-6 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-700 dark:text-slate-300 max-h-[46vh]">
+          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 font-medium text-slate-800 dark:text-slate-200">
+            I, the undersigned Applicant / Authorized Representative, hereby solemnly affirm, declare, and undertake as follows in connection with this Distributed Generation (Net-Billing) Application submitted to K-Electric under the <strong>NEPRA (Prosumer) Regulations, 2026</strong>:
+          </div>
+
+          <div class="space-y-3">
+            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <h4 class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center justify-center">1</span>
+                <span>Truthfulness &amp; Accuracy of Entered Information</span>
+              </h4>
+              <p class="text-slate-600 dark:text-slate-400 pl-7">
+                All personal, billing, and technical particulars entered in this application form—including my NADRA CNIC Number, Expiry Date, K-Electric 13-digit Consumer Reference Number, Sanctioned Load (kW), Connected Load (kW), Supply Phase, Proposed Solar PV Capacity (kW), and Inverter Rating (kW)—are true, complete, and accurate to the best of my knowledge and belief.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <h4 class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center justify-center">2</span>
+                <span>Authenticity &amp; Legitimacy of Submitted Documents</span>
+              </h4>
+              <p class="text-slate-600 dark:text-slate-400 pl-7">
+                All supporting documents declared and uploaded with this application—including the NADRA CNIC copy, latest K-Electric Electricity Bill, Registered Sale Deed / Allotment Letter / Lease Agreement, Landlord's No-Objection Certificate (NOC, where applicable), Single-Line Diagram (SLD), Schedule-V Affidavit, Vendor Checklist, and Inverter Datasheet / Protection Settings Letter—are authentic, genuine, unaltered, and legally valid copies of the originals.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <h4 class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center justify-center">3</span>
+                <span>Regulatory &amp; Grid Safety Undertaking (NEPRA Reg. 3, 4 &amp; 9)</span>
+              </h4>
+              <p class="text-slate-600 dark:text-slate-400 pl-7">
+                I understand and agree that my proposed solar system capacity shall not exceed my sanctioned load, my connection must be a compliant 3-phase supply, and my grid-tied inverter incorporates certified anti-islanding protection (IEC 62116 / IEEE 1547). I shall not energize or parallel the distributed generation facility with the K-Electric distribution network prior to formal inspection and bi-directional meter commissioning.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <h4 class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center justify-center">4</span>
+                <span>Liability for Misrepresentation or Forged Documents</span>
+              </h4>
+              <p class="text-slate-600 dark:text-slate-400 pl-7">
+                I acknowledge that if any information provided herein is found to be false, misleading, or inaccurate, or if any attached document is found to be forged, expired, or unauthentic during verification, K-Electric and the installer reserve the right to summarily reject this application or revoke net-billing interconnection approval without liability.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <h4 class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center justify-center">5</span>
+                <span>Consent to Automated Compliance &amp; Staff Review</span>
+              </h4>
+              <p class="text-slate-600 dark:text-slate-400 pl-7">
+                I hereby consent to the automated verification of my application pack (including PII-redacted cross-document consistency checks) and subsequent engineering review for K-Electric net-billing filing.
+              </p>
+            </div>
+          </div>
+
+          <!-- Bottom Anchor & Explicit Acknowledgment Checkbox -->
+          <div id="consent-bottom-anchor" class="pt-3 border-t border-slate-200 dark:border-slate-800">
+            <label class="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/80 cursor-pointer">
+              <input id="consent-agree-checkbox" type="checkbox" class="mt-0.5 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
+              <span class="text-xs font-bold text-slate-900 dark:text-white leading-snug">
+                I confirm that I have read the entire Consent &amp; Undertaking above, and I certify that all entered details and uploaded documents are authentic, accurate, and legitimate.
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Modal Footer with Locked/Unlocked Final Submission Button -->
+        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+          <button id="cancel-consent-btn" type="button" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-colors cursor-pointer">
+            Back to Form
+          </button>
+
+          <button id="submit-new-case-btn" type="submit" disabled
+            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition-all shadow-xl flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed cursor-pointer">
+            <span id="submit-spinner" class="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin hidden"></span>
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span id="submit-btn-text">
+              {% if edit_mode %}Save Changes &amp; Re-Run Compliance Checks{% else %}Submit Application &amp; Run Compliance Checks{% endif %}
+            </span>
+          </button>
+        </div>
+
+      </div>
     </div>
 
   </form>
@@ -320,5 +443,5 @@
 <script>
   window.__INITIAL_PACK__ = {{ pack_json | safe }};
 </script>
-<script src="/static/new_case.js?v=4"></script>
+<script src="/static/new_case.js?v=5"></script>
 {% endblock %}

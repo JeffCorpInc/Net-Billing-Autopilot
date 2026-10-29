@@ -10,6 +10,7 @@
   let isEditMode = false;
   let editCaseId = '';
   let selectedFilesBuffer = []; // Array of File objects pending upload
+  let hasScrolledToBottom = false;
 
   document.addEventListener('DOMContentLoaded', () => {
     const root = document.getElementById('new-case-root');
@@ -22,6 +23,12 @@
     const cleanBtn = document.getElementById('fill-clean-btn');
     const trapBtn = document.getElementById('fill-trap-btn');
     const fileInput = document.getElementById('f-file-upload');
+    const openConsentBtn = document.getElementById('open-consent-btn');
+    const closeConsentBtn = document.getElementById('close-consent-btn');
+    const cancelConsentBtn = document.getElementById('cancel-consent-btn');
+    const consentScrollDownBtn = document.getElementById('consent-scroll-down-btn');
+    const consentScrollBody = document.getElementById('consent-scroll-body');
+    const consentCheckbox = document.getElementById('consent-agree-checkbox');
 
     // If in Edit Mode, populate form with existing pack data
     if (isEditMode && window.__INITIAL_PACK__) {
@@ -70,10 +77,120 @@
 
     bindExistingFileDeleteButtons();
 
+    // Consent Modal controls
+    if (openConsentBtn) {
+      openConsentBtn.addEventListener('click', () => {
+        if (form && !form.reportValidity()) {
+          return;
+        }
+        openConsentModal();
+      });
+    }
+
+    if (closeConsentBtn) closeConsentBtn.addEventListener('click', closeConsentModal);
+    if (cancelConsentBtn) cancelConsentBtn.addEventListener('click', closeConsentModal);
+
+    if (consentScrollDownBtn) {
+      consentScrollDownBtn.addEventListener('click', () => {
+        if (consentScrollBody) {
+          consentScrollBody.scrollTo({
+            top: consentScrollBody.scrollHeight,
+            behavior: 'smooth',
+          });
+        }
+        hasScrolledToBottom = true;
+        if (consentCheckbox) {
+          consentCheckbox.checked = true;
+        }
+        updateConsentSubmitState();
+      });
+    }
+
+    if (consentScrollBody) {
+      consentScrollBody.addEventListener('scroll', () => {
+        const atBottom =
+          consentScrollBody.scrollTop + consentScrollBody.clientHeight >=
+          consentScrollBody.scrollHeight - 24;
+        if (atBottom) {
+          hasScrolledToBottom = true;
+          updateConsentSubmitState();
+        }
+      });
+    }
+
+    if (consentCheckbox) {
+      consentCheckbox.addEventListener('change', () => {
+        if (consentCheckbox.checked) {
+          hasScrolledToBottom = true;
+        }
+        updateConsentSubmitState();
+      });
+    }
+
     if (form) {
       form.addEventListener('submit', submitCaseForm);
     }
   });
+
+  function openConsentModal() {
+    const modal = document.getElementById('consent-modal');
+    const scrollBody = document.getElementById('consent-scroll-body');
+    const checkbox = document.getElementById('consent-agree-checkbox');
+    if (!modal) return;
+
+    hasScrolledToBottom = false;
+    if (checkbox) checkbox.checked = false;
+    updateConsentSubmitState();
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    if (scrollBody) {
+      scrollBody.scrollTop = 0;
+    }
+    if (window.lucide) window.lucide.createIcons({ root: modal });
+  }
+
+  function closeConsentModal() {
+    const modal = document.getElementById('consent-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function updateConsentSubmitState() {
+    const submitBtn = document.getElementById('submit-new-case-btn');
+    const checkbox = document.getElementById('consent-agree-checkbox');
+    const hint = document.getElementById('consent-scroll-hint');
+    const jumpBtn = document.getElementById('consent-scroll-down-btn');
+
+    const isUnlocked = Boolean(hasScrolledToBottom && checkbox && checkbox.checked);
+
+    if (submitBtn) {
+      submitBtn.disabled = !isUnlocked;
+    }
+
+    if (hint) {
+      if (isUnlocked) {
+        hint.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"></i><span class="text-emerald-700 dark:text-emerald-300">Consent verified! You may now click "Submit Application &amp; Run Compliance Checks" below.</span>`;
+        if (window.lucide) window.lucide.createIcons({ root: hint });
+      } else if (hasScrolledToBottom) {
+        hint.innerHTML = `<i data-lucide="check-square" class="w-3.5 h-3.5 shrink-0"></i><span>Reached the bottom — check the confirmation box below to unlock final submission.</span>`;
+        if (window.lucide) window.lucide.createIcons({ root: hint });
+      } else {
+        hint.innerHTML = `<i data-lucide="info" class="w-3.5 h-3.5 shrink-0"></i><span>Please read the complete undertaking to the bottom to unlock final submission.</span>`;
+        if (window.lucide) window.lucide.createIcons({ root: hint });
+      }
+    }
+
+    if (jumpBtn) {
+      if (hasScrolledToBottom) {
+        jumpBtn.classList.add('opacity-60');
+      } else {
+        jumpBtn.classList.remove('opacity-60');
+      }
+    }
+  }
 
   function setVal(id, val) {
     const el = document.getElementById(id);
@@ -262,6 +379,13 @@
 
   async function submitCaseForm(e) {
     e.preventDefault();
+
+    // Enforce consent gate before allowing submission
+    const consentCheckbox = document.getElementById('consent-agree-checkbox');
+    if (!hasScrolledToBottom || (consentCheckbox && !consentCheckbox.checked)) {
+      openConsentModal();
+      return;
+    }
 
     const btn = document.getElementById('submit-new-case-btn');
     const spinner = document.getElementById('submit-spinner');
