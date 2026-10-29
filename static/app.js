@@ -199,7 +199,7 @@ async function updateLLMIndicator() {
 
     if (data.mode === 'live') {
       dot.className = 'w-2 h-2 rounded-full bg-emerald-500 shrink-0';
-      text.textContent = `Live · ${data.llm_model || 'online'}`;
+      text.textContent = 'Gemini Live';
       badge.className = 'inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300';
     } else if (data.mode === 'mock') {
       dot.className = 'w-2 h-2 rounded-full bg-purple-500 shrink-0';
