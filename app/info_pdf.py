@@ -507,3 +507,4 @@ def generate_info_pdf_bytes() -> bytes:
     # Build the document
     doc.build(story, canvasmaker=NumberedReportCanvas)
     return buf.getvalue()
+
