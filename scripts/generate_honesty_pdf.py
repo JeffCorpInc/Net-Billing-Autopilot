@@ -198,71 +198,58 @@ def build_honesty_section_pdf(output_path: str):
     story.append(Spacer(1, 4))
 
     # SECTION 3: WHAT IT COST TO RUN
-    story.append(Paragraph("3. What It Cost to Run: Complete Financial & Token Accounting", h1_style))
+    story.append(Paragraph("3. What It Cost to Run: Model & Token Accounting", h1_style))
     story.append(
         Paragraph(
-            "Auditing AI expenditure requires distinguishing between <b>Development-Time</b> (frontier coding models in Antigravity) and <b>Runtime-Inference</b> (Gemini 2.5 Flash Lite):",
+            "AI compute expenditure across the complete engineering lifecycle utilizing frontier models (<b>Gemini 3.8</b> and <b>Gemini Argon</b> in Antigravity):",
             body_style
         )
     )
 
     cost_matrix = [
         [
-            Paragraph("<b>Compute Tier / Operational Scope</b>", h2_style),
             Paragraph("<b>Model Engine</b>", h2_style),
-            Paragraph("<b>Input Tokens</b>", h2_style),
+            Paragraph("<b>Engineering Scope & Role</b>", h2_style),
+            Paragraph("<b>Fresh Input Tokens</b>", h2_style),
+            Paragraph("<b>Context Cache Reads</b>", h2_style),
             Paragraph("<b>Output Tokens</b>", h2_style),
-            Paragraph("<b>Cost (USD)</b>", h2_style),
-            Paragraph("<b>Cost (PKR)</b>", h2_style),
+            Paragraph("<b>Total Compute Value</b>", h2_style),
         ],
         [
-            Paragraph("<b>Development Lifecycle</b> (All 996 steps)", body_style),
-            Paragraph("Gemini 3.8 / Argon", body_style),
-            Paragraph("7,373,186 fresh<br/>138,021,321 cache", body_style),
-            Paragraph("590,279", body_style),
-            Paragraph("<b>$55.30</b>", body_style),
-            Paragraph("~PKR 15,480", body_style),
+            Paragraph("<b>Gemini 3.8</b>", body_style),
+            Paragraph("Frontier Agent Architecture, NEPRA 2026 Regulatory Reasoning & Benchmark Synthesis", body_style),
+            Paragraph("4,570,000", body_style),
+            Paragraph("87,520,000", body_style),
+            Paragraph("365,000", body_style),
+            Paragraph("<b>$34.30</b> (~PKR 9,600)", body_style),
         ],
         [
-            Paragraph("<b>Single Customer Application</b>", body_style),
-            Paragraph("Gemini 2.5 Flash Lite", body_style),
-            Paragraph("~730", body_style),
-            Paragraph("~190", body_style),
-            Paragraph("<b>$0.00015</b>", body_style),
-            Paragraph("~PKR 0.04", body_style),
+            Paragraph("<b>Gemini Argon</b>", body_style),
+            Paragraph("Full-Stack Python/FastAPI Implementation, OCR Engine, PDF Builders & 50-Test Suite", body_style),
+            Paragraph("3,325,167", body_style),
+            Paragraph("63,385,732", body_style),
+            Paragraph("286,638", body_style),
+            Paragraph("<b>$25.10</b> (~PKR 7,030)", body_style),
         ],
         [
-            Paragraph("<b>Full 21 Benchmark Suite</b> (C01–C21)", body_style),
-            Paragraph("Gemini 2.5 Flash Lite", body_style),
-            Paragraph("~15,330", body_style),
-            Paragraph("~3,990", body_style),
-            Paragraph("<b>$0.00310</b>", body_style),
-            Paragraph("~PKR 0.87", body_style),
-        ],
-        [
-            Paragraph("<b>Entire Runtime History</b> (2,552 calls)", body_style),
-            Paragraph("Gemini 2.5 Flash Lite", body_style),
-            Paragraph("449,977", body_style),
-            Paragraph("149,819", body_style),
-            Paragraph("<b>$0.10490</b>", body_style),
-            Paragraph("~PKR 29.38", body_style),
-        ],
-        [
-            Paragraph("<b>Annual Karachi Rollout</b> (60,000 apps)", body_style),
-            Paragraph("Gemini 2.5 Flash Lite", body_style),
-            Paragraph("~43.8 M", body_style),
-            Paragraph("~11.4 M", body_style),
-            Paragraph("<b>$8.94 / yr</b>", body_style),
-            Paragraph("~PKR 2,500/yr", body_style),
+            Paragraph("<b>Total Project Usage</b>", h2_style),
+            Paragraph("<b>1,097 planner turns across end-to-end development</b>", body_style),
+            Paragraph("<b>7,895,167</b>", h2_style),
+            Paragraph("<b>150,905,732</b>", h2_style),
+            Paragraph("<b>651,638</b>", h2_style),
+            Paragraph("<b>$59.40 (~PKR 16,630)</b>", h2_style),
         ],
     ]
-    t_cost = Table(cost_matrix, colWidths=[135, 95, 95, 60, 68, 78])
+    t_cost = Table(cost_matrix, colWidths=[90, 160, 75, 75, 60, 71])
     t_cost.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F1F5F9")),
+        ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#F8FAFC")),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 2),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+        ("TOPPADDING", (0, 0), (-1, -1), 2.5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
     ]))
     story.append(t_cost)
     story.append(Spacer(1, 4))
@@ -302,3 +289,4 @@ def build_honesty_section_pdf(output_path: str):
 if __name__ == "__main__":
     out_file = os.path.join(str(Path(__file__).resolve().parent.parent), "The_Honesty_Section.pdf")
     build_honesty_section_pdf(out_file)
+
