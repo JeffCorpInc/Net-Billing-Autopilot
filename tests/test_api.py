@@ -271,3 +271,26 @@ def test_assistant_chat_endpoint_and_visibility(client):
     assert "0400099887766" not in raw_json_str
 
 
+
+
+def test_info_page_and_pdf_export(client):
+    """Verify /info page loads and /api/info/pdf delivers valid multi-page PDF bytes."""
+    res_info = client.get("/info")
+    assert res_info.status_code == 200
+    assert "Working Record" in res_info.text
+    assert "The Honesty Section" in res_info.text
+    assert "Gemini Live" in res_info.text
+    assert "C01" in res_info.text
+    assert "C09" in res_info.text
+
+    # Verify alias /dossier works
+    res_dossier = client.get("/dossier")
+    assert res_dossier.status_code == 200
+
+    # Verify /api/info/pdf endpoint
+    res_pdf = client.get("/api/info/pdf")
+    assert res_pdf.status_code == 200
+    assert res_pdf.headers["content-type"] == "application/pdf"
+    assert "attachment" in res_pdf.headers.get("content-disposition", "")
+    assert len(res_pdf.content) > 5000
+    assert res_pdf.content.startswith(b"%PDF-")

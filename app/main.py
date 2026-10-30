@@ -261,6 +261,15 @@ async def about_page(request: Request):
     return templates.TemplateResponse(request=request, name="about.html", context=context)
 
 
+@app.get("/info", response_class=HTMLResponse)
+@app.get("/dossier", response_class=HTMLResponse)
+async def info_page(request: Request):
+    """Render working record notebook and honesty dossier page."""
+    context = get_base_context(request)
+    context.update({"active_page": "info"})
+    return templates.TemplateResponse(request=request, name="info.html", context=context)
+
+
 
 # ---------------------------------------------------------------------------
 # API routes
@@ -706,6 +715,23 @@ async def get_draft_pdf(case_id: str, download: int = 0):
         event_type="draft_generated",
         details={"disposition": disposition, "size_bytes": len(pdf_bytes)},
     )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'{disposition}; filename="{filename}"'},
+    )
+
+
+@app.get("/api/info/pdf")
+async def get_info_dossier_pdf(download: int = 1):
+    """Generate and download technical working record and honesty dossier PDF."""
+    from fastapi.responses import Response
+    from app.info_pdf import generate_info_pdf_bytes
+
+    pdf_bytes = generate_info_pdf_bytes()
+    disposition = "attachment" if download == 1 else "inline"
+    filename = "NetBill-Assist-Working-Record-and-Honesty-Dossier.pdf"
 
     return Response(
         content=pdf_bytes,
