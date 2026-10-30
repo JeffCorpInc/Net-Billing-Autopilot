@@ -97,6 +97,34 @@
   }
 }
 
+/* Responsive Hero Banner Animations */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide-in-1 {
+  animation: fadeSlideIn 0.5s ease-out forwards;
+}
+
+.animate-fade-slide-in-2 {
+  animation: fadeSlideIn 0.7s ease-out forwards;
+}
+
+.animate-fade-slide-in-3 {
+  animation: fadeSlideIn 0.9s ease-out forwards;
+}
+
+.animate-fade-slide-in-4 {
+  animation: fadeSlideIn 1.1s ease-out forwards;
+}
+
 /* Print optimizations */
 @media print {
   .no-print {
