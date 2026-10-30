@@ -551,3 +551,4 @@ def build_complete_summary_pdf(output_path: str):
 if __name__ == "__main__":
     out_file = os.path.join(str(Path(__file__).resolve().parent.parent), "NetBill_Assist_Complete_Project_Dossier.pdf")
     build_complete_summary_pdf(out_file)
+

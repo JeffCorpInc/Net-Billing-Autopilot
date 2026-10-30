@@ -870,9 +870,15 @@ Return ONLY this JSON:
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">5. The Honesty Section: System Limitations &amp; Production Hazards</h2>
           </div>
         </div>
-        <span class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800 self-start sm:self-auto">
-          Mandatory 1-Page Disclosure
-        </span>
+        <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <a href="/api/honesty/pdf" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition-colors">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Download 1-Page Honesty PDF</span>
+          </a>
+          <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800">
+            Mandatory 1-Page PDF
+          </span>
+        </div>
       </div>
 
       <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
@@ -969,7 +975,9 @@ Return ONLY this JSON:
         <span>•</span>
         <a href="/about" class="hover:text-slate-900 dark:hover:text-white transition-colors">Regulations</a>
         <span>•</span>
-        <a href="/api/info/pdf" target="_blank" class="text-teal-600 dark:text-teal-400 font-bold hover:underline">Download PDF</a>
+        <a href="/api/honesty/pdf" target="_blank" class="text-rose-600 dark:text-rose-400 font-bold hover:underline">1-Page Honesty PDF</a>
+        <span>•</span>
+        <a href="/api/info/pdf" target="_blank" class="text-teal-600 dark:text-teal-400 font-bold hover:underline">6-Page Full Dossier</a>
       </div>
     </div>
   </footer>

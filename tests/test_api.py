@@ -294,3 +294,21 @@ def test_info_page_and_pdf_export(client):
     assert "attachment" in res_pdf.headers.get("content-disposition", "")
     assert len(res_pdf.content) > 5000
     assert res_pdf.content.startswith(b"%PDF-")
+
+    # Verify standalone 1-page Honesty PDF endpoint /api/honesty/pdf (Requirement 4)
+    res_honesty = client.get("/api/honesty/pdf")
+    assert res_honesty.status_code == 200
+    assert res_honesty.headers["content-type"] == "application/pdf"
+    assert "The_Honesty_Section.pdf" in res_honesty.headers.get("content-disposition", "")
+    assert res_honesty.content.startswith(b"%PDF-")
+
+    # Verify exactly 1 page
+    import io
+    import pypdf
+    reader = pypdf.PdfReader(io.BytesIO(res_honesty.content))
+    assert len(reader.pages) == 1, f"Expected 1 page, got {len(reader.pages)}"
+
+    # Verify alias /honesty/pdf
+    res_honesty_alias = client.get("/honesty/pdf")
+    assert res_honesty_alias.status_code == 200
+    assert res_honesty_alias.headers["content-type"] == "application/pdf"

@@ -190,3 +190,4 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
 };
 
 export default ResponsiveHeroBanner;
+

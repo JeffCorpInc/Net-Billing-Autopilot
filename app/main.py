@@ -740,6 +740,24 @@ async def get_info_dossier_pdf(download: int = 1):
     )
 
 
+@app.get("/api/honesty/pdf")
+@app.get("/honesty/pdf")
+async def get_honesty_section_pdf(download: int = 1):
+    """Generate and download standalone 1-page Honesty Section PDF (Requirement 4)."""
+    from fastapi.responses import Response
+    from app.info_pdf import generate_honesty_pdf_bytes
+
+    pdf_bytes = generate_honesty_pdf_bytes()
+    disposition = "attachment" if download == 1 else "inline"
+    filename = "The_Honesty_Section.pdf"
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'{disposition}; filename="{filename}"'},
+    )
+
+
 @app.post("/api/review/{case_id}")
 async def submit_review(case_id: str, request: Request):
     """Mark case reviewed by onboarding staff member."""
